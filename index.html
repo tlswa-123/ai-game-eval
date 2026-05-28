@@ -157,7 +157,7 @@ const DIRECT_CASES=[
 // ===== STATE =====
 const P=new URLSearchParams(location.search);
 let mode=P.get('mode')||'admin';
-let cfg={name:P.get('name')||'',platform:P.get('platform')||'',target:P.get('target')||'multi',cases:(P.get('cases')||'').split(',').filter(Boolean)};
+let cfg={name:P.get('name')||'',platform:P.get('platform')||'',platforms:(P.get('platforms')||P.get('platform')||'').split(',').filter(Boolean),target:P.get('target')||'multi',cases:(P.get('cases')||'').split(',').filter(Boolean)};
 let scores={},timers={},notes={},fields={},activeTimers={};
 
 // ===== GITHUB =====
@@ -185,14 +185,14 @@ function setField(k,v){fields[k]=v}
 // ===== RENDER =====
 function setMode(m){mode=m;render()}
 function render(){
-  const hasTester=cfg.name&&cfg.platform;
+  const hasTester=cfg.name&&cfg.platforms.length;
   const modes=hasTester?[['tester','🎮 测评'],['admin','⚙️ 管理'],['summary','📊 汇总']]:[['admin','⚙️ 管理/分发'],['summary','📊 汇总']];
   document.getElementById('modeBar').innerHTML=modes.map(([k,l])=>`<button class="mode-btn ${mode===k?'active':''}" onclick="setMode('${k}')">${l}</button>`).join('');
   const el=document.getElementById('content');
   if(mode==='tester')el.innerHTML=renderTester();
   else if(mode==='admin')el.innerHTML=renderAdmin();
   else{el.innerHTML='<div class="loading">⏳ 加载中...</div>';loadSummary()}
-  document.getElementById('pageSub').textContent=hasTester?`${cfg.name} · ${cfg.platform}`:'';
+  document.getElementById('pageSub').textContent=hasTester?`${cfg.name} · ${cfg.platforms.join(' / ')}`:'';
 }
 
 // ===== TESTER =====
@@ -271,9 +271,7 @@ function renderAdmin(){
     h+=`<div class="admin-card"><div class="remove" onclick="removeAssignment(${idx})">✕</div>
     <div class="admin-row">
       <input placeholder="姓名" value="${a.name}" onchange="assignments[${idx}].name=this.value;saveAssignments();render()">
-      <select onchange="assignments[${idx}].platform=this.value;saveAssignments();render()">
-        ${PLATFORMS.map(p=>`<option ${a.platform===p?'selected':''}>${p}</option>`).join('')}
-      </select>
+      <input placeholder="平台(逗号分隔多个)" value="${(a.platforms||[a.platform]||[]).join(',')}" style="width:180px" onchange="assignments[${idx}].platforms=this.value.split(',').map(s=>s.trim()).filter(Boolean);saveAssignments();render()">
       <select onchange="assignments[${idx}].target=this.value;saveAssignments();render()">
         <option value="multi" ${a.target==='multi'?'selected':''}>③ 多轮修改</option>
         <option value="gdd" ${a.target==='gdd'?'selected':''}>① GDD复刻</option>
@@ -289,21 +287,22 @@ function renderAdmin(){
   return h;
 }
 
-function addAssignment(){assignments.push({name:'',platform:PLATFORMS[0],target:'multi',cases:[]});saveAssignments();render()}
+function addAssignment(){assignments.push({name:'',platforms:[],target:'multi',cases:[]});saveAssignments();render()}
 function removeAssignment(i){assignments.splice(i,1);saveAssignments();render()}
 function toggleCase(idx,id){const a=assignments[idx];if(!a.cases)a.cases=[];const i=a.cases.indexOf(id);if(i>=0)a.cases.splice(i,1);else a.cases.push(id);saveAssignments();render()}
 function saveAssignments(){localStorage.setItem('eval-assignments',JSON.stringify(assignments))}
 function genLink(a){
   const tk=localStorage.getItem('gh_token')||'';
   const cases=a.target==='multi'?'m1,m2,m3':(a.cases||[]).join(',');
-  return`${BASE_URL}?token=${encodeURIComponent(tk)}&name=${encodeURIComponent(a.name)}&platform=${encodeURIComponent(a.platform)}&target=${a.target}&cases=${cases}&mode=tester`;
+  const plats=(a.platforms||[a.platform]||[]).join(',');
+  return`${BASE_URL}?token=${encodeURIComponent(tk)}&name=${encodeURIComponent(a.name)}&platforms=${encodeURIComponent(plats)}&target=${a.target}&cases=${cases}&mode=tester`;
 }
 
 // ===== SUBMIT =====
 async function doSubmit(){
   const btn=document.getElementById('submitBtn');
   btn.textContent='⏳ 提交中...';btn.disabled=true;
-  const result={name:cfg.name,platform:cfg.platform,target:cfg.target,time:new Date().toISOString(),rounds:[]};
+  const result={name:cfg.name,platforms:cfg.platforms,target:cfg.target,time:new Date().toISOString(),rounds:[]};
   
   if(cfg.target==='multi'){
     MULTI_ROUNDS.forEach(round=>{
@@ -364,7 +363,7 @@ function exportAll(){
 
 // ===== INIT =====
 if(P.get('token'))localStorage.setItem('gh_token',P.get('token'));
-if(cfg.name&&cfg.platform)mode='tester';
+if(cfg.name&&cfg.platforms.length)mode='tester';
 render();
 </script>
 </body>
