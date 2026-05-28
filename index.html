@@ -224,6 +224,7 @@ function scoreGrid(itemKey,dims,shorts){
   return h;
 }
 
+let assigns=JSON.parse(localStorage.getItem('ea5')||localStorage.getItem('ea4')||'[]');
 function adminH(){
   let h='<div class="s"><div class="sd"><b>Token:</b></div><input type="password" value="'+(localStorage.getItem('gh_token')||'')+'" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:4px;font-size:10px" onchange="localStorage.setItem(\'gh_token\',this.value);toast(\'ok\')"></div>';
   h+='<div class="s"><button class="tab active" style="border:none" onclick="addA()">+ 新增测评人</button></div>';
