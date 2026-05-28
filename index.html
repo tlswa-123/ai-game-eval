@@ -31,6 +31,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 .st{font-size:18px;font-weight:700}
 .sd{color:var(--dim);font-size:14px;margin-bottom:5px;line-height:1.6}
 .prompt-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px 18px;font-size:14px;margin-bottom:8px;cursor:pointer;line-height:1.5}
+.prompt-box{position:relative}
+.prompt-box::after{content:"\590D\5236";position:absolute;top:8px;right:10px;font-size:10px;padding:2px 8px;background:var(--accent);color:#fff;border-radius:4px;pointer-events:none}
+.prompt-box.copied::after{content:"\2713";background:var(--green)}
+
 .prompt-box:hover{border-color:var(--accent)}
 .prompt-box.copied{border-color:var(--green)}
 .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:5px}
@@ -213,7 +217,7 @@ function scoreGrid(itemKey,dims,shorts){
     // Note
     h+='<div class="extras"><input placeholder="备注" value="'+(fields[base+'_n']||'').replace(/"/g,'&quot;')+'" onchange="fields[\''+base+'_n\']=this.value"></div>';
     // Image upload (max 4)
-    h+='<div class="extras" style="flex-direction:column;align-items:stretch;gap:3px;margin-top:4px" ondrop="dropImg(event,\''+base+'\')" ondragover="event.preventDefault()" onpaste="pasteImg(event,\''+base+'\')" tabindex="0"><div style="font-size:11px;color:var(--light)">截图（拖拽/粘贴/点击，最多4张）（最多4张）</div><div id="imgs_'+base+'" style="display:flex;gap:3px;flex-wrap:wrap">';
+    h+='<div class="extras" style="flex-direction:column;align-items:stretch;gap:3px;margin-top:4px" ondrop="dropImg(event,\''+base+'\')" ondragover="event.preventDefault()" onpaste="pasteImg(event,\''+base+'\')" tabindex="0"><div style="font-size:11px;color:var(--light)">截图（拖拽/粘贴/点击，最多4张）（最多4张）</div><div id="imgs_'+base+'" data-imgbase="'+base+'" tabindex="0" style="display:flex;gap:3px;flex-wrap:wrap">';
     const imgs=fields[base+'_imgs']||[];
     imgs.forEach((src,ii)=>{h+='<div style="position:relative;width:60px;height:60px;border-radius:4px;overflow:hidden;border:1px solid var(--border)"><img src="'+src+'" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;top:1px;right:1px;width:14px;height:14px;background:var(--red);color:#fff;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="rmImg(\''+base+'\','+ii+')">x</div></div>'});
     if(imgs.length<4){h+='<label style="width:60px;height:60px;border:1px dashed var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--light)"><input type="file" accept="image/*" style="display:none" onchange="addImg(\''+base+'\',this)">+</label>';}
@@ -398,6 +402,9 @@ function readImg(base,file){if(!file||!file.type.startsWith('image'))return;cons
 function dropImg(e,base){e.preventDefault();e.stopPropagation();const file=e.dataTransfer.files[0];if(file)readImg(base,file)}
 function pasteImg(e,base){const items=e.clipboardData&&e.clipboardData.items;if(!items)return;for(let i=0;i<items.length;i++){if(items[i].type.startsWith('image')){e.preventDefault();readImg(base,items[i].getAsFile());return}}}
 function rmImg(base,idx){if(fields[base+'_imgs'])fields[base+'_imgs'].splice(idx,1);render()}
+document.addEventListener("paste",function(e){var el=document.activeElement;if(el&&el.dataset&&el.dataset.imgbase){var items=e.clipboardData&&e.clipboardData.items;if(!items)return;for(var i=0;i<items.length;i++){if(items[i].type.indexOf("image")===0){e.preventDefault();readImg(el.dataset.imgbase,items[i].getAsFile());return}}}});
+document.addEventListener("drop",function(e){var el=e.target.closest("[data-imgbase]");if(el){e.preventDefault();readImg(el.dataset.imgbase,e.dataTransfer.files[0])}});
+document.addEventListener("dragover",function(e){if(e.target.closest("[data-imgbase]"))e.preventDefault()});
 render();
 </script>
 </body>
