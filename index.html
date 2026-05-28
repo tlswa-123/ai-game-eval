@@ -198,14 +198,29 @@ function scoreGrid(itemKey,dims,shorts){
       }
       h+='</div></div>';
     });
-    h+='<div class="extras"><span class="tm" id="tm_'+base+'">'+fmt(timers[base]||0)+'</span><button class="tb" onclick="tStart(\''+base+'\')">&#9654;</button><button class="tb" onclick="tStop(\''+base+'\')">||</button><button class="tb" onclick="tReset(\''+base+'\')">R</button><input placeholder="备注" value="'+(fields[base+'_n']||'').replace(/"/g,'&quot;')+'" onchange="fields[\''+base+'_n\']=this.value"></div>';
+    // Subjective score row
+    const subjK=base+'_subj';
+    h+='<div class="sr"><span class="sl">主观综合</span><div class="sb">';
+    for(let v=0;v<4;v++){
+      h+='<button class="sc'+(scores[subjK]===v?' a'+v:'')+'" data-k="'+subjK+'" data-v="'+v+'" onclick="setS(\''+subjK+'\','+v+')">'+v+'<span class="tp">'+['想关掉','无感','想收藏','想分享'][v]+'</span></button>';
+    }
+    h+='</div></div>';
+    // Timer + manual time input
+    h+='<div class="extras"><span class="tm" id="tm_'+base+'">'+fmt(timers[base]||0)+'</span><button class="tb" onclick="tStart(\''+base+'\')">&#9654;</button><button class="tb" onclick="tStop(\''+base+'\')">||</button><button class="tb" onclick="tReset(\''+base+'\')">R</button><input type="number" placeholder="分钟" style="width:50px" value="'+(fields[base+'_min']||'')+'" onchange="fields[\''+base+'_min\']=this.value"><span style="font-size:8px;color:var(--light)">min</span></div>';
+    // Note
+    h+='<div class="extras"><input placeholder="备注" value="'+(fields[base+'_n']||'').replace(/"/g,'&quot;')+'" onchange="fields[\''+base+'_n\']=this.value"></div>';
+    // Image upload (max 4)
+    h+='<div class="extras" style="flex-direction:column;align-items:stretch;gap:3px;margin-top:4px"><div style="font-size:8px;color:var(--light)">产物截图（最多4张）</div><div id="imgs_'+base+'" style="display:flex;gap:3px;flex-wrap:wrap">';
+    const imgs=fields[base+'_imgs']||[];
+    imgs.forEach((src,ii)=>{h+='<div style="position:relative;width:60px;height:60px;border-radius:4px;overflow:hidden;border:1px solid var(--border)"><img src="'+src+'" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;top:1px;right:1px;width:14px;height:14px;background:var(--red);color:#fff;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="rmImg(\''+base+'\','+ii+')">x</div></div>'});
+    if(imgs.length<4){h+='<label style="width:60px;height:60px;border:1px dashed var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--light)"><input type="file" accept="image/*" style="display:none" onchange="addImg(\''+base+'\',this)">+</label>';}
+    h+='</div></div>';
     h+='</div>';
   });
   h+='</div>';
   return h;
 }
-// ===== ADMIN (no rubric side) =====
-let assigns=JSON.parse(localStorage.getItem('ea5')||'[]');
+
 function adminH(){
   let h='<div class="s"><div class="sd"><b>Token:</b></div><input type="password" value="'+(localStorage.getItem('gh_token')||'')+'" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:4px;font-size:10px" onchange="localStorage.setItem(\'gh_token\',this.value);toast(\'ok\')"></div>';
   h+='<div class="s"><button class="tab active" style="border:none" onclick="addA()">+ 新增测评人</button></div>';
@@ -375,4 +390,19 @@ if(cfg.name&&cfg.platforms.length)mode='tester';
 render();
 </script>
 </body>
-</html>
+</html>function addImg(base,input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    if(!fields[base+'_imgs'])fields[base+'_imgs']=[];
+    if(fields[base+'_imgs'].length>=4)return;
+    fields[base+'_imgs'].push(e.target.result);
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+function rmImg(base,idx){
+  if(fields[base+'_imgs'])fields[base+'_imgs'].splice(idx,1);
+  render();
+}
+
