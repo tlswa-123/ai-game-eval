@@ -211,17 +211,63 @@ function renderTester(){
   if(!cfg.name||!cfg.cases.length)return`<div class="s"><div class="st">👋 请通过管理员分配的链接进入测评</div><div class="sd">或切换到「管理」模式生成链接</div></div>`;
   const cases=getCases();
   const hasMulti=cases.some(c=>c.type==='multi');
-  let h=`<div class="rubric-box"><b>评分：</b>0=不可用 1=及格 2=好用 3=超预期 | hover按钮看标准 | <b>平台: ${cfg.platform}</b></div>`;
-  if(hasMulti)h+=`<div class="s"><div class="sh"><div class="sn" style="background:#44403c">★</div><div class="st">基础Prompt</div></div><div class="prompt-box" onclick="copyText(this,'${MULTI_BASE}')">${MULTI_BASE}</div></div>`;
-  cases.forEach(c=>{
+  const hasGen=cases.some(c=>c.type!=='multi');
+  
+  // Section 1: Instructions
+  let h=`<div class="s"><div class="sh"><div class="sn" style="background:var(--dark)">📋</div><div class="st">你的测评任务</div></div>
+  <div class="sd" style="line-height:2">
+    <b>测评人：</b>${cfg.name}<br>
+    <b>测评平台：</b>${cfg.platform}<br>
+    <b>需测评：</b>${cases.length} 个用例
+  </div>
+  <div class="sd" style="background:var(--bg);padding:10px 12px;border-radius:8px;line-height:2">
+    <b>操作步骤：</b><br>
+    ${hasMulti?`① 先用下方「基础Prompt」在 <b>${cfg.platform}</b> 生成一个游戏<br>
+    ② 然后依次发送每个场景的修改Prompt<br>
+    ③ 每次修改后，对照标准给4个维度打分（0-3）<br>`
+    :`① 点击每个用例的 Prompt 区域一键复制<br>
+    ② 粘贴到 <b>${cfg.platform}</b> 平台生成游戏<br>
+    ③ 玩一玩生成的游戏，对照标准给6个维度打分（0-3）<br>`}
+    ④ 全部打完后点底部 <b>「提交」</b> 按钮 → 完成！
+  </div></div>`;
+
+  // Section 2: Rubric
+  if(hasMulti){
+    h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--yellow)">📏</div><div class="st">评分标准（目标③ 多轮修改）</div></div>
+    <table class="data"><tr><th style="width:70px">维度</th><th><span class="t" style="background:var(--red-bg);color:var(--red)">0 不可用</span></th><th><span class="t" style="background:var(--yellow-bg);color:var(--yellow)">1 及格</span></th><th><span class="t" style="background:var(--blue-bg);color:var(--blue)">2 好用</span></th><th><span class="t" style="background:var(--green-bg);color:var(--green)">3 超预期</span></th></tr>
+    ${MULTI_DIMS.map(d=>`<tr><td><b>${d.short}</b></td>${d.scores.map(s=>`<td style="font-size:10px">${s}</td>`).join('')}</tr>`).join('')}
+    </table></div>`;
+  }
+  if(hasGen){
+    h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--yellow)">📏</div><div class="st">评分标准（生成效果）</div></div>
+    <table class="data"><tr><th style="width:70px">维度</th><th><span class="t" style="background:var(--red-bg);color:var(--red)">0 不可用</span></th><th><span class="t" style="background:var(--yellow-bg);color:var(--yellow)">1 及格</span></th><th><span class="t" style="background:var(--blue-bg);color:var(--blue)">2 好用</span></th><th><span class="t" style="background:var(--green-bg);color:var(--green)">3 超预期</span></th></tr>
+    ${DIMS.map(d=>`<tr><td><b>${d.short}</b></td>${d.scores.map(s=>`<td style="font-size:10px">${s}</td>`).join('')}</tr>`).join('')}
+    </table></div>`;
+  }
+
+  // Section 3: Base prompt (for multi-round)
+  if(hasMulti){
+    h+=`<div class="s" style="border-color:var(--accent-border);background:var(--accent-light)"><div class="sh"><div class="sn" style="background:var(--dark)">★</div><div class="st">第一步：用此Prompt生成基础游戏</div></div>
+    <div class="sd">先在 <b>${cfg.platform}</b> 中用以下Prompt生成游戏，然后再进行后续修改测试：</div>
+    <div class="prompt-box" style="background:#fff" onclick="copyText(this,'${MULTI_BASE}')">${MULTI_BASE}</div></div>`;
+  }
+
+  // Section 4: Eval cards
+  h+=`<div style="margin:16px 0 8px;font-size:13px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:6px">${hasMulti?'修改场景评分':'用例评分'}</div>`;
+  cases.forEach((c,idx)=>{
     const k=`${c.type}_${c.num}`;
     const dims=c.type==='multi'?MULTI_DIMS:DIMS;
-    h+=`<div class="s"><div class="sh"><div class="sn">${c.num}</div><div class="st">${c.name||c.scene}</div><div style="margin-left:auto">${c.difficulty?diffTag(c.difficulty):`<span class="t t-medium">${c.scene}</span>`}</div></div>`;
+    h+=`<div class="s"><div class="sh"><div class="sn">${idx+1}</div><div class="st">${c.name||c.scene}</div><div style="margin-left:auto">${c.difficulty?diffTag(c.difficulty):`<span class="t t-medium">${c.scene}</span>`}</div></div>`;
+    if(c.type==='multi'){
+      h+=`<div class="sd">发送以下修改指令给 ${cfg.platform}，然后评价修改效果：</div>`;
+    }
     h+=`<div class="prompt-box" onclick="copyText(this,\`${c.prompt.replace(/`/g,"'")}\`)">${c.prompt}</div>`;
-    h+=dims.map(dim=>{const sk=`${k}_${dim.key}`;const val=scores[sk];return`<div class="score-row"><span class="score-label">${dim.short}</span><div class="score-btns">${[0,1,2,3].map(v=>`<button class="score-btn s${v} ${val===v?'active':''}" data-k="${sk}" data-v="${v}" onclick="setScore('${sk}',${v})">${v}<span class="tip"><b>${v}</b> ${dim.scores[v]}</span></button>`).join('')}</div></div>`}).join('');
-    h+=`<div class="timer-row"><span class="timer-display" id="t-${k}">${formatTime(timers[k]||0)}</span><button class="timer-btn" onclick="startTimer('${k}')">▶</button><button class="timer-btn" onclick="stopTimer('${k}')">⏸</button><button class="timer-btn" onclick="resetTimer('${k}')">↺</button><input class="note-input" placeholder="备注..." value="${(notes[k]||'').replace(/"/g,'&quot;')}" onchange="notes['${k}']=this.value"></div></div>`;
+    h+=`<div style="font-size:10px;color:var(--text-light);margin-bottom:6px">👇 对 ${cfg.platform} 的${c.type==='multi'?'修改结果':'生成结果'}打分：</div>`;
+    h+=dims.map(dim=>{const sk=`${k}_${dim.key}`;const val=scores[sk];return`<div class="score-row"><span class="score-label">${dim.short}</span><div class="score-btns">${[0,1,2,3].map(v=>`<button class="score-btn s${v} ${val===v?'active':''}" data-k="${sk}" data-v="${v}" onclick="setScore('${sk}',${v})">${v}<span class="tip"><b>${v}分</b> ${dim.scores[v]}</span></button>`).join('')}</div></div>`}).join('');
+    h+=`<div class="timer-row"><span class="timer-display" id="t-${k}">${formatTime(timers[k]||0)}</span><button class="timer-btn" onclick="startTimer('${k}')">▶</button><button class="timer-btn" onclick="stopTimer('${k}')">⏸</button><button class="timer-btn" onclick="resetTimer('${k}')">↺</button><input class="note-input" placeholder="备注（可选）..." value="${(notes[k]||'').replace(/"/g,'&quot;')}" onchange="notes['${k}']=this.value"></div></div>`;
   });
-  h+=`<div class="submit-bar"><span id="submitStatus" style="font-size:12px;color:var(--text-dim)">填完点击提交</span><button class="submit-btn" id="submitBtn" onclick="doSubmit()">📤 提交结果</button></div>`;
+
+  h+=`<div class="submit-bar"><span id="submitStatus" style="font-size:12px;color:var(--text-dim)">打完所有分数后点击提交</span><button class="submit-btn" id="submitBtn" onclick="doSubmit()">📤 提交结果</button></div>`;
   return h;
 }
 
