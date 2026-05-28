@@ -7,31 +7,29 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#fafaf9;--card:#fff;--border:#e7e5e4;--text:#1c1917;--text-dim:#78716c;--text-light:#a8a29e;--accent:#ea580c;--accent-light:#fff7ed;--accent-border:#fed7aa;--dark:#1c1917;--green:#166534;--green-bg:#dcfce7;--yellow:#92400e;--yellow-bg:#fef3c7;--red:#dc2626;--red-bg:#fef2f2;--blue:#1e40af;--blue-bg:#dbeafe}
+:root{--bg:#fafaf9;--card:#fff;--border:#e7e5e4;--text:#1c1917;--text-dim:#78716c;--text-light:#a8a29e;--accent:#ea580c;--accent-light:#fff7ed;--accent-border:#fed7aa;--dark:#1c1917;--dark-mid:#44403c;--green:#166534;--green-bg:#dcfce7;--yellow:#92400e;--yellow-bg:#fef3c7;--red:#dc2626;--red-bg:#fef2f2;--blue:#1e40af;--blue-bg:#dbeafe}
 body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:20px 16px}
-.w{max-width:920px;margin:0 auto}
-.hd{text-align:center;padding:28px 20px;background:linear-gradient(135deg,#1c1917,#44403c);border-radius:16px;color:#fff;margin-bottom:24px}
-.hd h1{font-size:20px;font-weight:700;margin:4px 0}.hd p{font-size:11px;opacity:.5}
+.w{max-width:960px;margin:0 auto}
+.hd{text-align:center;padding:24px 20px;background:linear-gradient(135deg,#1c1917,#44403c);border-radius:16px;color:#fff;margin-bottom:20px}
+.hd h1{font-size:18px;font-weight:700;margin:4px 0}.hd p{font-size:11px;opacity:.5}
 .badge{display:inline-block;background:var(--accent);padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;margin-bottom:4px}
-.mode-bar{display:flex;gap:6px;margin-bottom:20px;justify-content:center;flex-wrap:wrap}
-.mode-btn{padding:9px 20px;border:1px solid var(--border);background:var(--card);border-radius:10px;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s}
+.mode-bar{display:flex;gap:6px;margin-bottom:16px;justify-content:center;flex-wrap:wrap}
+.mode-btn{padding:8px 18px;border:1px solid var(--border);background:var(--card);border-radius:9px;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s}
 .mode-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
 .mode-btn:hover:not(.active){border-color:var(--accent)}
-.s{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px;transition:border-color .2s}
-.s:hover{border-color:var(--accent-border)}
-.s.done{border-color:#bbf7d0;background:#fafff9}
+.s{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
 .sh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .sn{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;background:var(--accent)}
 .st{font-size:14px;font-weight:700}
-.sd{color:var(--text-dim);font-size:11px;margin-bottom:10px;line-height:1.7}
+.sd{color:var(--text-dim);font-size:11px;margin-bottom:8px;line-height:1.7}
 .t{display:inline-block;padding:1px 7px;border-radius:6px;font-size:9px;font-weight:500}
-.t-easy{background:var(--green-bg);color:var(--green)}.t-medium{background:var(--yellow-bg);color:var(--yellow)}.t-hard{background:var(--red-bg);color:var(--red)}
-.prompt-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:12px;max-height:80px;overflow-y:auto;line-height:1.6;cursor:pointer;position:relative}
+.prompt-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:10px;line-height:1.6;cursor:pointer;position:relative}
 .prompt-box::after{content:'📋 复制';position:absolute;top:4px;right:8px;font-size:9px;color:var(--accent);opacity:0;transition:opacity .2s}
 .prompt-box:hover::after{opacity:1}
-.prompt-box.copied::after{content:'✓ 已复制';color:var(--green);opacity:1}
+.prompt-box.copied::after{content:'✓';color:var(--green);opacity:1}
+/* Score */
 .score-row{display:flex;align-items:center;gap:5px;margin-bottom:4px}
-.score-label{font-size:10px;color:var(--text-dim);width:46px;flex-shrink:0}
+.score-label{font-size:10px;color:var(--text-dim);width:44px;flex-shrink:0}
 .score-btns{display:flex;gap:2px}
 .score-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--card);color:var(--text-dim);border-radius:6px;cursor:pointer;font-size:10px;font-weight:600;transition:all .15s;position:relative}
 .score-btn:hover{border-color:var(--text-dim)}
@@ -39,35 +37,49 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;ba
 .score-btn.active.s1{background:var(--yellow-bg);border-color:#d97706;color:var(--yellow)}
 .score-btn.active.s2{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
 .score-btn.active.s3{background:var(--green-bg);border-color:var(--green);color:var(--green)}
-.score-btn .tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--dark);border-radius:8px;padding:7px 9px;font-size:10px;color:#fff;white-space:normal;width:170px;z-index:100;line-height:1.4;margin-bottom:5px;box-shadow:0 4px 12px rgba(0,0,0,.15);pointer-events:none;font-weight:400}
+.score-btn .tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--dark);border-radius:8px;padding:7px 9px;font-size:10px;color:#fff;white-space:normal;width:160px;z-index:100;line-height:1.4;margin-bottom:5px;box-shadow:0 4px 12px rgba(0,0,0,.15);pointer-events:none;font-weight:400}
 .score-btn:hover .tip{display:block}
-.timer-row{display:flex;align-items:center;gap:5px;margin-top:6px}
-.timer-display{font-family:ui-monospace,monospace;font-size:12px;color:var(--accent);min-width:40px}
-.timer-btn{width:24px;height:24px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+/* Extra fields */
+.field-row{display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.field-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:10px;flex:1;min-width:80px}
+.field-input:focus{outline:none;border-color:var(--accent)}
+.field-textarea{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-size:10px;width:100%;min-height:36px;resize:vertical;font-family:inherit}
+.field-textarea:focus{outline:none;border-color:var(--accent)}
+.field-label{font-size:9px;color:var(--text-light);min-width:44px}
+/* Timer */
+.timer-widget{display:flex;align-items:center;gap:4px}
+.timer-display{font-family:ui-monospace,monospace;font-size:12px;color:var(--accent);min-width:36px}
+.timer-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
 .timer-btn:hover{border-color:var(--accent)}
-.note-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:10px;flex:1;margin-left:6px}
-.note-input:focus{outline:none;border-color:var(--accent)}
-.submit-bar{position:sticky;bottom:0;background:var(--card);border:1px solid var(--border);padding:12px 16px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;border-radius:12px;box-shadow:0 -2px 12px rgba(0,0,0,.05)}
-.submit-btn{background:var(--accent);color:#fff;border:none;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
+/* Submit */
+.submit-bar{position:sticky;bottom:0;background:var(--card);border:1px solid var(--border);padding:12px 16px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;border-radius:12px;box-shadow:0 -2px 12px rgba(0,0,0,.04)}
+.submit-btn{background:var(--accent);color:#fff;border:none;padding:11px 28px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
 .submit-btn:hover{opacity:.9}.submit-btn:disabled{opacity:.4;cursor:not-allowed}
 .submit-btn.success{background:var(--green)}
-.admin-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;font-family:ui-monospace,monospace;color:var(--text);min-height:120px;resize:vertical;line-height:1.8}
-.admin-input:focus{outline:none;border-color:var(--accent)}
-.link-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:12px}
-.link-item .name{font-weight:600;min-width:60px;color:var(--accent)}
-.link-item .url{flex:1;color:var(--text-dim);word-break:break-all;font-size:10px}
-.link-item .copy-btn{padding:4px 10px;background:var(--accent);border:none;border-radius:6px;font-size:10px;cursor:pointer;color:#fff;font-weight:500}
-.rubric-box{background:var(--accent-light);border:1px solid var(--accent-border);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:10px;line-height:1.7}
-.rubric-box b{color:var(--accent)}
+/* Admin */
+.admin-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;position:relative}
+.admin-card .remove{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--red)}
+.admin-card .remove:hover{background:var(--red-bg)}
+.admin-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.admin-row input,.admin-row select{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text)}
+.admin-row input:focus,.admin-row select:focus{outline:none;border-color:var(--accent)}
+.admin-row input{width:100px}
+.admin-row select{min-width:120px}
+.checkbox-group{display:flex;gap:6px;flex-wrap:wrap}
+.checkbox-group label{display:flex;align-items:center;gap:3px;font-size:10px;cursor:pointer;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--card)}
+.checkbox-group label:has(input:checked){background:var(--accent-light);border-color:var(--accent-border);color:var(--accent)}
+.checkbox-group input{display:none}
+.link-output{margin-top:8px;padding:8px 10px;background:var(--card);border:1px solid var(--accent-border);border-radius:6px;font-size:10px;word-break:break-all;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.link-output .copy-btn{padding:4px 10px;background:var(--accent);border:none;border-radius:5px;font-size:10px;cursor:pointer;color:#fff;white-space:nowrap}
+/* Table */
 table.data{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
 table.data th,table.data td{padding:6px 8px;border:1px solid var(--border);text-align:center}
 table.data th{background:var(--bg);font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim)}
-.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.status-dot.done{background:var(--green)}.status-dot.pending{background:var(--border)}
+/* Toast */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--dark);color:#fff;padding:10px 16px;border-radius:10px;font-size:12px;opacity:0;transform:translateY(10px);transition:all .3s;z-index:9999}
 .toast.show{opacity:1;transform:translateY(0)}
 .loading{text-align:center;padding:40px;color:var(--text-dim);font-size:13px}
-@media(max-width:600px){.score-btn{width:26px;height:26px}.link-item{flex-direction:column;align-items:flex-start;gap:4px}}
+@media(max-width:600px){.admin-row{flex-direction:column;align-items:stretch}.admin-row input,.admin-row select{width:100%}}
 </style>
 </head>
 <body>
@@ -83,318 +95,277 @@ table.data th{background:var(--bg);font-weight:600;font-size:9px;text-transform:
 <div class="toast" id="toast"></div>
 
 <script>
-// ========== CONFIG ==========
 const REPO='tlswa-123/ai-game-eval';
 const GH_TOKEN=new URLSearchParams(location.search).get('token')||localStorage.getItem('gh_token')||'';
 const BASE_URL=location.origin+location.pathname;
 
-// ========== DIMS ==========
+// ===== DIMS =====
 const DIMS=[
-{key:'stability',short:'功能',scores:['致命bug无法启动','能运行但核心异常','核心循环正常小瑕疵','零Bug稳定']},
-{key:'visual',short:'视觉',scores:['元素缺失','可辨识但不协调','统一清晰协调','有点睛设计']},
+{key:'stability',short:'功能',scores:['致命bug无法启动','能运行但核心异常','核心正常小瑕疵','零Bug稳定']},
+{key:'visual',short:'视觉',scores:['元素缺失','可辨识不协调','统一清晰','有点睛设计']},
 {key:'audio',short:'音效',scores:['无/严重问题','有但瑕疵','完整契合','调动情绪']},
 {key:'faithfulness',short:'还原',scores:['严重跑题','有遗漏','全部实现','完整+扩展']},
 {key:'gameplay',short:'玩法',scores:['机制不成立','能玩但失衡','合理均衡','有惊喜']},
 {key:'subjective',short:'主观',scores:['想关掉','无感','想收藏','想分享']}
 ];
 const MULTI_DIMS=[
-{key:'intent',short:'意图',scores:['答非所问','方向对有偏差','准确理解','精确+关联']},
-{key:'precision',short:'精准',scores:['改错','牵连/新Bug','精准无Bug','精准+优化']},
+{key:'intent',short:'意图',scores:['答非所问','方向对有偏差','准确理解','精确+考虑关联']},
+{key:'precision',short:'精准',scores:['改错地方','牵连/新Bug','精准无Bug','精准+优化']},
 {key:'completeness',short:'完成',scores:['没执行','一小部分','80%完成','全部完成']},
 {key:'quality',short:'质量',scores:['改崩了','质量下降','持平/提升','明显变好']}
 ];
 
-// ========== CASES ==========
-const CASES={
-g:[
+// ===== CASES =====
+const PLATFORMS=['我们+Claude4.7','我们+GLM5.1','WB+Claude4.7','WB+GLM5.1','Astrocade','Replit'];
+const MULTI_BASE='做个水果三消游戏，8x8的格子，点击两个相邻水果交换位置，3个以上同类水果连成一排就消除，消除后上面的水果掉下来补位，要有分数显示和连击combo效果';
+const MULTI_ROUNDS=[
+  {num:1,prompt:'消除后不要再生成新水果了，让格子慢慢清空就过关。做成无尽模式让玩家能一直玩停不下来',conflict:'不补水果→必然清空结束 vs 无尽→不能结束'},
+  {num:2,prompt:'把格子改成6x6但每行只能放5个水果',conflict:'6列格子 vs 每行只放5个，空间定义矛盾'},
+  {num:3,prompt:'把水果种类从6种加到12种，同时要求3个相同的连成一排才能消除',conflict:'12种塞进8x8=64格，每种平均5.3个，极难凑出3连'}
+];
+
+const GDD_CASES=[
 {num:1,name:'对对连消',difficulty:'简单',prompt:'请根据GDD复刻：对对连消（连连看·暖冬牧场卡通）'},
 {num:2,name:'奇妙不停消',difficulty:'简单',prompt:'请根据GDD复刻：奇妙不停消（推牌滑动·中式扁平）'},
 {num:3,name:'挪一挪大师',difficulty:'简单',prompt:'请根据GDD复刻：挪一挪大师（方向逃离·Low-Poly）'},
-{num:4,name:'旅行餐车',difficulty:'简单',prompt:'请根据GDD复刻：旅行餐车（合成经营·卡通马卡龙）'},
+{num:4,name:'旅行餐车',difficulty:'简单',prompt:'请根据GDD复刻：旅行餐车（合成经营·卡通）'},
 {num:5,name:'最美消消消',difficulty:'简单',prompt:'请根据GDD复刻：最美消消消（泡泡龙·宇宙星空）'},
-{num:6,name:'星星喜消消',difficulty:'简单',prompt:'请根据GDD复刻：星星喜消消（星星消除·夜空）'},
+{num:6,name:'星星喜消消',difficulty:'简单',prompt:'请根据GDD复刻：星星喜消消（星星消除）'},
 {num:7,name:'收贝经典方块',difficulty:'中等',prompt:'请根据GDD复刻：收贝经典方块（俄罗斯方块·像素）'},
-{num:8,name:'密室消除7',difficulty:'中等',prompt:'请根据GDD复刻：密室消除7（三消·cascade连锁）'},
-{num:9,name:'萌小贝迷你小镇',difficulty:'较难',prompt:'请根据GDD复刻：萌小贝迷你小镇（多玩法合集）'},
-{num:10,name:'吃碰杠胡了',difficulty:'较难',prompt:'请根据GDD复刻：吃碰杠胡了（2.5D堆叠点消）'}
-],
-d:[
-{num:1,name:'连连看·无画风',difficulty:'简单',prompt:'做个连连看游戏，网格里找两个相同图案，中间能用不超过两个拐角的路径连起来就消除，消除后上面的方块掉下来补位'},
-{num:2,name:'方向逃离·无画风',difficulty:'简单',prompt:'做个解谜消除游戏，棋盘上有各种带方向箭头的动物，点击一个动物它就沿箭头方向飞出去，飞出边界就算消掉，路上撞到其他动物就失败扣血，3点血用完游戏结束'},
-{num:3,name:'中式水墨·无玩法',difficulty:'简单',prompt:'做一个中国风水墨画风格的休闲游戏，宣纸质感背景，墨色晕染效果，元素用工笔画风格，配色以黛青墨色为主辅以朱砂红点缀，要有文化韵味'},
-{num:4,name:'泡泡龙·完整',difficulty:'简单',prompt:'做个泡泡龙游戏，清新卡通风格明亮配色。从底部瞄准发射彩色泡泡，飞到顶部吸附，3个同色相连就消除。要有瞄准辅助线，有分数'},
-{num:5,name:'合成大西瓜·完整',difficulty:'简单',prompt:'做一个合成大西瓜类游戏，温馨可爱的卡通画风。各种圆滚滚的水果从上面掉下来，选位置松手落下，两个相同的碰到合成更大的，最大是西瓜'},
-{num:6,name:'星星消除·完整',difficulty:'简单',prompt:'做一个太空主题的消除游戏，深邃星空背景配高饱和发光方块。点击2个以上相连的同色方块直接消除，消完往下掉补位，追求高分，要有combo连击计分'},
-{num:7,name:'推牌消除·无画风',difficulty:'中等',prompt:'做一个麻将消除游戏，棋盘上摆满麻将牌，滑动一行或一列让所有牌联动移动，两张相同的牌挨在一起就自动配对消除，消掉所有牌就通关'},
-{num:8,name:'俄罗斯方块·像素',difficulty:'中等',prompt:'做一个像素复古风的俄罗斯方块。8-bit像素画面深色背景，方块用像素格子绘制配复古色板。经典玩法：方块从顶部下落，控制移动旋转，填满一行消除'},
-{num:9,name:'宝石三消·3D圆润',difficulty:'中等',prompt:'做一个宝石三消游戏，3D卡通圆润风格有立体感和光泽。8x8格子点击两个相邻宝石交换，3个同色消除，可能触发连锁combo'},
-{num:10,name:'液体排序·极简',difficulty:'中等',prompt:'做一个极简设计的液体排序游戏。纯黑背景，试管是细线白色轮廓，液体用5种高饱和纯色半透明渐变。点击试管倒液体，装满同色完成'},
-{num:11,name:'赛博朋克·无玩法',difficulty:'中等',prompt:'做一个赛博朋克霓虹风格的游戏。深黑背景，所有元素都有霓虹发光描边效果，用品红电蓝荧光绿亮橙等高饱和霓虹色'},
-{num:12,name:'塔防·扁平卡通',difficulty:'较难',prompt:'做一个卡通扁平风塔防。俯视绿色草地上有弯曲泥土路径。3种塔：箭塔单体、炮塔范围、冰塔减速。10波递增有Boss，基地10血'},
-{num:13,name:'射击·赛博朋克',difficulty:'较难',prompt:'做一个赛博朋克风太空射击游戏。玩家飞船底部左右滑动自动发射，敌人编队从顶部出现，3条命被击中无敌2秒'},
-{num:14,name:'跑酷·涂鸦风',difficulty:'较难',prompt:'做一个手绘涂鸦风格的横版跑酷，浅黄网格纸背景，角色自动往右跑，点击跳跃躲避障碍，长按滑翔'},
-{num:15,name:'堆叠点消·无画风',difficulty:'较难',prompt:'做一个层叠消除游戏，2D俯视，多层牌叠放有遮挡，点击最上面的牌飞到7格槽，凑3消除，槽满失败，120秒倒计时'}
-],
-m:[
-{num:1,scene:'修Bug',prompt:'点击操作后没有响应，元素不会移动'},
-{num:2,scene:'改玩法',prompt:'把无尽模式改成60秒限时模式，时间到显示最终得分'},
-{num:3,scene:'多条指令',prompt:'帮我改三个地方：1.背景改成黑色 2.加个60秒倒计时 3.分数字体放大两倍'},
-{num:4,scene:'模糊反馈',prompt:'感觉不太好玩'}
-]};
-const MULTI_BASE='做个水果三消游戏，8x8的格子，点击两个相邻水果交换位置，3个以上同类水果连成一排就消除，消除后上面的水果掉下来补位，要有分数显示和连击combo效果';
+{num:8,name:'密室消除7',difficulty:'中等',prompt:'请根据GDD复刻：密室消除7（三消·cascade）'},
+{num:9,name:'萌小贝迷你小镇',difficulty:'较难',prompt:'请根据GDD复刻：萌小贝迷你小镇（多玩法）'},
+{num:10,name:'吃碰杠胡了',difficulty:'较难',prompt:'请根据GDD复刻：吃碰杠胡了（2.5D堆叠）'}
+];
+const DIRECT_CASES=[
+{num:1,name:'连连看',difficulty:'简单',prompt:'做个连连看游戏，网格里找两个相同图案，不超过两个拐角的路径连起来就消除'},
+{num:2,name:'方向逃离',difficulty:'简单',prompt:'做个解谜消除游戏，棋盘上有带方向箭头的动物，点击沿方向飞出边界消除'},
+{num:3,name:'中式水墨',difficulty:'简单',prompt:'做一个中国风水墨画风格的休闲游戏，宣纸背景，墨色晕染'},
+{num:4,name:'泡泡龙',difficulty:'简单',prompt:'做个泡泡龙游戏，清新卡通。从底部发射泡泡，3个同色消除'},
+{num:5,name:'合成大西瓜',difficulty:'简单',prompt:'做一个合成大西瓜类游戏，两个相同水果碰到合成更大的'},
+{num:6,name:'星星消除',difficulty:'简单',prompt:'太空主题消除，点击相连同色方块消除，要有combo'},
+{num:7,name:'推牌消除',difficulty:'中等',prompt:'麻将消除，滑动行列让相同牌相邻配对消除'},
+{num:8,name:'俄罗斯方块',difficulty:'中等',prompt:'像素复古俄罗斯方块，方块下落控制旋转填满消行'},
+{num:9,name:'宝石三消',difficulty:'中等',prompt:'宝石三消，3D圆润风格，交换相邻宝石3连消除'},
+{num:10,name:'液体排序',difficulty:'中等',prompt:'极简液体排序，纯黑底白轮廓试管，5色液体'},
+{num:11,name:'赛博朋克',difficulty:'中等',prompt:'赛博朋克霓虹风格游戏，深黑底霓虹发光'},
+{num:12,name:'塔防',difficulty:'较难',prompt:'卡通扁平塔防，3种塔10波递增有Boss'},
+{num:13,name:'射击',difficulty:'较难',prompt:'赛博朋克太空射击，飞船滑动自动射击'},
+{num:14,name:'跑酷',difficulty:'较难',prompt:'手绘涂鸦横版跑酷，自动跑点击跳跃'},
+{num:15,name:'堆叠点消',difficulty:'较难',prompt:'2D层叠消除，遮挡点击飞入7格槽凑3消除'}
+];
 
-// ========== STATE ==========
+// ===== STATE =====
 const P=new URLSearchParams(location.search);
-let mode=P.get('mode')||'tester';
-let cfg={name:P.get('name')||'',platform:P.get('platform')||'',cases:(P.get('cases')||'').split(',').filter(Boolean)};
-let scores={},timers={},notes={},activeTimers={};
+let mode=P.get('mode')||'admin';
+let cfg={name:P.get('name')||'',platform:P.get('platform')||'',target:P.get('target')||'multi',cases:(P.get('cases')||'').split(',').filter(Boolean)};
+let scores={},timers={},notes={},fields={},activeTimers={};
 
-// ========== GITHUB API ==========
+// ===== GITHUB =====
 async function ghPut(path,content){
-  // Check if file exists first
   let sha='';
-  try{
-    const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{headers:{'Authorization':'token '+GH_TOKEN}});
-    if(r.ok){const d=await r.json();sha=d.sha}
-  }catch(e){}
+  try{const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{headers:{'Authorization':'token '+GH_TOKEN}});if(r.ok){sha=(await r.json()).sha}}catch(e){}
   const body={message:`submit: ${cfg.name} ${cfg.platform}`,content:btoa(unescape(encodeURIComponent(content)))};
   if(sha)body.sha=sha;
   const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{method:'PUT',headers:{'Authorization':'token '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
   return r.ok;
 }
-async function ghList(dir){
-  const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${dir}`,{headers:{'Authorization':'token '+GH_TOKEN}});
-  if(!r.ok)return[];
-  return await r.json();
-}
-async function ghGet(path){
-  const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{headers:{'Authorization':'token '+GH_TOKEN}});
-  if(!r.ok)return null;
-  const d=await r.json();
-  return JSON.parse(decodeURIComponent(escape(atob(d.content))));
-}
+async function ghList(dir){const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${dir}`,{headers:{'Authorization':'token '+GH_TOKEN}});if(!r.ok)return[];return r.json()}
+async function ghGet(path){const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{headers:{'Authorization':'token '+GH_TOKEN}});if(!r.ok)return null;const d=await r.json();return JSON.parse(decodeURIComponent(escape(atob(d.content))))}
 
-// ========== UTILS ==========
+// ===== UTILS =====
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function copyText(el,text){navigator.clipboard.writeText(text);el.classList.add('copied');setTimeout(()=>el.classList.remove('copied'),1500)}
+function copyText(el,text){navigator.clipboard.writeText(text);if(el){el.classList.add('copied');setTimeout(()=>el.classList.remove('copied'),1200)}}
 function formatTime(s){return`${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`}
-function diffTag(d){if(d==='简单')return'<span class="t t-easy">简单</span>';if(d==='中等')return'<span class="t t-medium">中等</span>';return'<span class="t t-hard">较难</span>'}
 function startTimer(k){if(activeTimers[k])return;if(!timers[k])timers[k]=0;activeTimers[k]=setInterval(()=>{timers[k]++;const el=document.getElementById('t-'+k);if(el)el.textContent=formatTime(timers[k])},1000)}
 function stopTimer(k){if(activeTimers[k]){clearInterval(activeTimers[k]);delete activeTimers[k]}}
 function resetTimer(k){stopTimer(k);timers[k]=0;const el=document.getElementById('t-'+k);if(el)el.textContent='0:00'}
 function setScore(k,v){scores[k]=v;document.querySelectorAll(`[data-k="${k}"]`).forEach(b=>b.classList.toggle('active',+b.dataset.v===v))}
+function setField(k,v){fields[k]=v}
 
-// ========== PARSE CASES ==========
-function getCases(){
-  return cfg.cases.map(id=>{
-    const t=id[0],n=parseInt(id.slice(1));
-    const src=CASES[t];if(!src||!src[n-1])return null;
-    return{...src[n-1],type:t==='g'?'gdd':t==='d'?'direct':'multi'};
-  }).filter(Boolean);
-}
-
-// ========== RENDER ==========
+// ===== RENDER =====
 function setMode(m){mode=m;render()}
 function render(){
-  // Mode bar
-  const modes=cfg.name?[['tester','🎮 测评'],['admin','⚙️ 管理'],['summary','📊 汇总']]:[['admin','⚙️ 管理/分发'],['summary','📊 汇总']];
+  const hasTester=cfg.name&&cfg.platform;
+  const modes=hasTester?[['tester','🎮 测评'],['admin','⚙️ 管理'],['summary','📊 汇总']]:[['admin','⚙️ 管理/分发'],['summary','📊 汇总']];
   document.getElementById('modeBar').innerHTML=modes.map(([k,l])=>`<button class="mode-btn ${mode===k?'active':''}" onclick="setMode('${k}')">${l}</button>`).join('');
   const el=document.getElementById('content');
   if(mode==='tester')el.innerHTML=renderTester();
   else if(mode==='admin')el.innerHTML=renderAdmin();
-  else if(mode==='summary'){el.innerHTML='<div class="loading">⏳ 加载数据中...</div>';loadSummary()}
-  // Header
-  document.getElementById('pageSub').textContent=cfg.name?`${cfg.name} · ${cfg.platform} · ${cfg.cases.length}个用例`:'管理员模式';
+  else{el.innerHTML='<div class="loading">⏳ 加载中...</div>';loadSummary()}
+  document.getElementById('pageSub').textContent=hasTester?`${cfg.name} · ${cfg.platform}`:'';
 }
 
+// ===== TESTER =====
 function renderTester(){
-  if(!cfg.name||!cfg.cases.length)return`<div class="s"><div class="st">👋 请通过管理员分配的链接进入测评</div><div class="sd">或切换到「管理」模式生成链接</div></div>`;
-  const cases=getCases();
-  const hasMulti=cases.some(c=>c.type==='multi');
-  const hasGen=cases.some(c=>c.type!=='multi');
-  
-  // Section 1: Instructions
-  let h=`<div class="s"><div class="sh"><div class="sn" style="background:var(--dark)">📋</div><div class="st">你的测评任务</div></div>
-  <div class="sd" style="line-height:2">
-    <b>测评人：</b>${cfg.name}<br>
-    <b>测评平台：</b>${cfg.platform}<br>
-    <b>需测评：</b>${cases.length} 个用例
-  </div>
+  if(!cfg.name)return'<div class="s"><div class="st">👋 请通过管理员分发的链接进入</div></div>';
+  const isMulti=cfg.target==='multi';
+  let h='';
+
+  // Instructions
+  h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--dark)">📋</div><div class="st">你的测评任务</div></div>
+  <div class="sd" style="line-height:2"><b>测评人：</b>${cfg.name} &nbsp;|&nbsp; <b>平台：</b>${cfg.platform} &nbsp;|&nbsp; <b>目标：</b>${isMulti?'③多轮修改（3轮矛盾指令）':'①②生成测评'}</div>
   <div class="sd" style="background:var(--bg);padding:10px 12px;border-radius:8px;line-height:2">
-    <b>操作步骤：</b><br>
-    ${hasMulti?`① 先用下方「基础Prompt」在 <b>${cfg.platform}</b> 生成一个游戏<br>
-    ② 然后依次发送每个场景的修改Prompt<br>
-    ③ 每次修改后，对照标准给4个维度打分（0-3）<br>`
-    :`① 点击每个用例的 Prompt 区域一键复制<br>
-    ② 粘贴到 <b>${cfg.platform}</b> 平台生成游戏<br>
-    ③ 玩一玩生成的游戏，对照标准给6个维度打分（0-3）<br>`}
-    ④ 全部打完后点底部 <b>「提交」</b> 按钮 → 完成！
+    <b>步骤：</b><br>
+    ${isMulti?`① 用下方基础Prompt在 <b>${cfg.platform}</b> 生成游戏<br>② 按顺序发送3轮修改指令（注意：指令故意包含矛盾）<br>③ 每轮评价AI的处理能力（4维度 + 主观 + 问题记录）<br>④ 全部完成后点「提交」`
+    :`① 复制Prompt → 在 <b>${cfg.platform}</b> 生成游戏<br>② 体验游戏后打6个维度分（0-3）<br>③ 全部完成后点「提交」`}
   </div></div>`;
 
-  // Section 2: Rubric
-  if(hasMulti){
-    h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--yellow)">📏</div><div class="st">评分标准（目标③ 多轮修改）</div></div>
-    <table class="data"><tr><th style="width:70px">维度</th><th><span class="t" style="background:var(--red-bg);color:var(--red)">0 不可用</span></th><th><span class="t" style="background:var(--yellow-bg);color:var(--yellow)">1 及格</span></th><th><span class="t" style="background:var(--blue-bg);color:var(--blue)">2 好用</span></th><th><span class="t" style="background:var(--green-bg);color:var(--green)">3 超预期</span></th></tr>
-    ${MULTI_DIMS.map(d=>`<tr><td><b>${d.short}</b></td>${d.scores.map(s=>`<td style="font-size:10px">${s}</td>`).join('')}</tr>`).join('')}
-    </table></div>`;
-  }
-  if(hasGen){
-    h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--yellow)">📏</div><div class="st">评分标准（生成效果）</div></div>
-    <table class="data"><tr><th style="width:70px">维度</th><th><span class="t" style="background:var(--red-bg);color:var(--red)">0 不可用</span></th><th><span class="t" style="background:var(--yellow-bg);color:var(--yellow)">1 及格</span></th><th><span class="t" style="background:var(--blue-bg);color:var(--blue)">2 好用</span></th><th><span class="t" style="background:var(--green-bg);color:var(--green)">3 超预期</span></th></tr>
-    ${DIMS.map(d=>`<tr><td><b>${d.short}</b></td>${d.scores.map(s=>`<td style="font-size:10px">${s}</td>`).join('')}</tr>`).join('')}
-    </table></div>`;
-  }
+  // Rubric
+  const dims=isMulti?MULTI_DIMS:DIMS;
+  h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--yellow)">📏</div><div class="st">评分标准</div></div>
+  <table class="data"><tr><th>维度</th><th style="color:var(--red)">0 不可用</th><th style="color:var(--yellow)">1 及格</th><th style="color:var(--blue)">2 好用</th><th style="color:var(--green)">3 超预期</th></tr>
+  ${dims.map(d=>`<tr><td><b>${d.short}</b></td>${d.scores.map(s=>`<td style="font-size:10px">${s}</td>`).join('')}</tr>`).join('')}
+  </table></div>`;
 
-  // Section 3: Base prompt (for multi-round)
-  if(hasMulti){
-    h+=`<div class="s" style="border-color:var(--accent-border);background:var(--accent-light)"><div class="sh"><div class="sn" style="background:var(--dark)">★</div><div class="st">第一步：用此Prompt生成基础游戏</div></div>
-    <div class="sd">先在 <b>${cfg.platform}</b> 中用以下Prompt生成游戏，然后再进行后续修改测试：</div>
+  if(isMulti){
+    // Base prompt
+    h+=`<div class="s" style="border-color:var(--accent-border);background:var(--accent-light)"><div class="sh"><div class="sn" style="background:var(--dark)">★</div><div class="st">第一步：生成基础游戏</div></div>
+    <div class="sd">在 <b>${cfg.platform}</b> 中发送：</div>
     <div class="prompt-box" style="background:#fff" onclick="copyText(this,'${MULTI_BASE}')">${MULTI_BASE}</div></div>`;
+
+    // Rounds
+    h+=`<div style="margin:14px 0 8px;font-size:13px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:5px">修改轮次评分</div>`;
+    MULTI_ROUNDS.forEach((round,i)=>{
+      const k=`m_${round.num}`;
+      h+=`<div class="s"><div class="sh"><div class="sn">${i+1}</div><div class="st">轮${round.num}</div></div>`;
+      h+=`<div class="prompt-box" onclick="copyText(this,'${round.prompt}')">${round.prompt}</div>`;
+      h+=`<div class="sd" style="color:var(--red);font-size:10px">⚠️ 内含矛盾：${round.conflict}</div>`;
+      h+=`<div style="font-size:10px;color:var(--text-light);margin:6px 0 4px">评分：</div>`;
+      h+=MULTI_DIMS.map(dim=>{const sk=`${k}_${dim.key}`;const val=scores[sk];return`<div class="score-row"><span class="score-label">${dim.short}</span><div class="score-btns">${[0,1,2,3].map(v=>`<button class="score-btn s${v} ${val===v?'active':''}" data-k="${sk}" data-v="${v}" onclick="setScore('${sk}',${v})">${v}<span class="tip"><b>${v}</b> ${dim.scores[v]}</span></button>`).join('')}</div></div>`}).join('');
+      // Extra fields
+      h+=`<div class="field-row"><span class="field-label">主观</span><div class="score-btns">${[0,1,2,3].map(v=>{const sk2=`${k}_subj`;const val2=scores[sk2];return`<button class="score-btn s${v} ${val2===v?'active':''}" data-k="${sk2}" data-v="${v}" onclick="setScore('${sk2}',${v})">${v}</button>`}).join('')}</div></div>`;
+      h+=`<div class="field-row"><span class="field-label">耗时</span><div class="timer-widget"><span class="timer-display" id="t-${k}">${formatTime(timers[k]||0)}</span><button class="timer-btn" onclick="startTimer('${k}')">▶</button><button class="timer-btn" onclick="stopTimer('${k}')">⏸</button><button class="timer-btn" onclick="resetTimer('${k}')">↺</button></div></div>`;
+      h+=`<div class="field-row" style="margin-top:4px"><span class="field-label">问题</span><textarea class="field-textarea" placeholder="记录发现的问题..." onchange="setField('${k}_issue',this.value)">${fields[`${k}_issue`]||''}</textarea></div>`;
+      h+=`<div class="field-row"><span class="field-label">备注</span><input class="field-input" placeholder="其他备注..." value="${(fields[`${k}_note`]||'').replace(/"/g,'&quot;')}" onchange="setField('${k}_note',this.value)"></div>`;
+      h+=`</div>`;
+    });
+  } else {
+    // GDD or Direct cases
+    const cases=cfg.cases.map(id=>{const t=id[0],n=+id.slice(1);if(t==='g')return{...GDD_CASES[n-1],type:'gdd'};if(t==='d')return{...DIRECT_CASES[n-1],type:'direct'};return null}).filter(Boolean);
+    cases.forEach((c,i)=>{
+      const k=`${c.type}_${c.num}`;
+      h+=`<div class="s"><div class="sh"><div class="sn">${i+1}</div><div class="st">${c.name}</div></div>`;
+      h+=`<div class="prompt-box" onclick="copyText(this,'${c.prompt}')">${c.prompt}</div>`;
+      h+=DIMS.map(dim=>{const sk=`${k}_${dim.key}`;const val=scores[sk];return`<div class="score-row"><span class="score-label">${dim.short}</span><div class="score-btns">${[0,1,2,3].map(v=>`<button class="score-btn s${v} ${val===v?'active':''}" data-k="${sk}" data-v="${v}" onclick="setScore('${sk}',${v})">${v}<span class="tip"><b>${v}</b> ${dim.scores[v]}</span></button>`).join('')}</div></div>`}).join('');
+      h+=`<div class="field-row"><span class="field-label">耗时</span><div class="timer-widget"><span class="timer-display" id="t-${k}">${formatTime(timers[k]||0)}</span><button class="timer-btn" onclick="startTimer('${k}')">▶</button><button class="timer-btn" onclick="stopTimer('${k}')">⏸</button><button class="timer-btn" onclick="resetTimer('${k}')">↺</button></div><input class="field-input" placeholder="备注..." value="${(fields[`${k}_note`]||'').replace(/"/g,'&quot;')}" onchange="setField('${k}_note',this.value)"></div></div>`;
+    });
   }
 
-  // Section 4: Eval cards
-  h+=`<div style="margin:16px 0 8px;font-size:13px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:6px">${hasMulti?'修改场景评分':'用例评分'}</div>`;
-  cases.forEach((c,idx)=>{
-    const k=`${c.type}_${c.num}`;
-    const dims=c.type==='multi'?MULTI_DIMS:DIMS;
-    h+=`<div class="s"><div class="sh"><div class="sn">${idx+1}</div><div class="st">${c.name||c.scene}</div><div style="margin-left:auto">${c.difficulty?diffTag(c.difficulty):`<span class="t t-medium">${c.scene}</span>`}</div></div>`;
-    if(c.type==='multi'){
-      h+=`<div class="sd">发送以下修改指令给 ${cfg.platform}，然后评价修改效果：</div>`;
-    }
-    h+=`<div class="prompt-box" onclick="copyText(this,\`${c.prompt.replace(/`/g,"'")}\`)">${c.prompt}</div>`;
-    h+=`<div style="font-size:10px;color:var(--text-light);margin-bottom:6px">👇 对 ${cfg.platform} 的${c.type==='multi'?'修改结果':'生成结果'}打分：</div>`;
-    h+=dims.map(dim=>{const sk=`${k}_${dim.key}`;const val=scores[sk];return`<div class="score-row"><span class="score-label">${dim.short}</span><div class="score-btns">${[0,1,2,3].map(v=>`<button class="score-btn s${v} ${val===v?'active':''}" data-k="${sk}" data-v="${v}" onclick="setScore('${sk}',${v})">${v}<span class="tip"><b>${v}分</b> ${dim.scores[v]}</span></button>`).join('')}</div></div>`}).join('');
-    h+=`<div class="timer-row"><span class="timer-display" id="t-${k}">${formatTime(timers[k]||0)}</span><button class="timer-btn" onclick="startTimer('${k}')">▶</button><button class="timer-btn" onclick="stopTimer('${k}')">⏸</button><button class="timer-btn" onclick="resetTimer('${k}')">↺</button><input class="note-input" placeholder="备注（可选）..." value="${(notes[k]||'').replace(/"/g,'&quot;')}" onchange="notes['${k}']=this.value"></div></div>`;
-  });
-
-  h+=`<div class="submit-bar"><span id="submitStatus" style="font-size:12px;color:var(--text-dim)">打完所有分数后点击提交</span><button class="submit-btn" id="submitBtn" onclick="doSubmit()">📤 提交结果</button></div>`;
+  h+=`<div class="submit-bar"><span style="font-size:11px;color:var(--text-dim)">完成后点击提交</span><button class="submit-btn" id="submitBtn" onclick="doSubmit()">📤 提交结果</button></div>`;
   return h;
 }
 
+// ===== ADMIN =====
+let assignments=JSON.parse(localStorage.getItem('eval-assignments')||'[]');
+
 function renderAdmin(){
-  return`<div class="s"><div class="sh"><div class="sn">⚙</div><div class="st">分配测评任务 & 生成链接</div></div>
-  <div class="sd" style="margin-bottom:8px"><b>GitHub Token（首次配置）：</b><br><input type="password" id="tokenInput" placeholder="ghp_xxxxx" value="" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;margin:4px 0" onchange="localStorage.setItem(\x27gh_token\x27,this.value);showToast(\x27✓ Token已保存\x27)"><span style="font-size:9px;color:var(--text-light)">Token保存在浏览器本地，不会上传</span></div>
-  <div class="sd">每行格式：<code>姓名, 平台, case编号(逗号分隔)</code><br>
-  编号：<b>g1-g10</b>=GDD复刻, <b>d1-d15</b>=直接需求, <b>m1-m4</b>=多轮修改<br>
-  示例：张三, WeCreat, g1,g2,g3</div>
-  <textarea class="admin-input" id="assignInput" placeholder="张三, WeCreat, g1,g2,g3&#10;李四, WorkBuddy, g1,g2,g3&#10;王五, TapTap制造, d1,d2,d3&#10;赵六, WeCreat, m1,m2,m3,m4">${localStorage.getItem('eval-assign')||''}</textarea>
-  <button class="mode-btn" style="margin-top:12px;background:var(--accent);color:#fff;border-color:var(--accent)" onclick="genLinks()">🔗 生成链接</button>
-  <div id="linkList" style="margin-top:12px"></div></div>
-  <div class="s"><div class="sh"><div class="sn" style="background:#44403c">📊</div><div class="st">查看汇总</div></div>
-  <div class="sd">点击上方「📊 汇总」查看所有人的提交结果</div></div>`;
-}
+  let h=`<div class="s"><div class="sh"><div class="sn">⚙</div><div class="st">分发测评任务</div></div>
+  <div class="sd" style="margin-bottom:8px"><b>Token配置（首次）：</b></div>
+  <input type="password" id="tokenInput" placeholder="ghp_xxxxx" value="${localStorage.getItem('gh_token')||''}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;margin-bottom:12px" onchange="localStorage.setItem('gh_token',this.value);showToast('✓ Token已保存')">
+  <button class="mode-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="addAssignment()">+ 新增测评人</button>
+  </div>`;
 
-function genLinks(){
-  const input=document.getElementById('assignInput').value.trim();
-  localStorage.setItem('eval-assign',input);
-  const lines=input.split('\n').filter(l=>l.trim());
-  let h='';
-  lines.forEach(line=>{
-    const [name,platform,...caseParts]=line.split(',').map(s=>s.trim());
-    if(!name||!platform||!caseParts.length)return;
-    const cases=caseParts.join(',');
-    const tk=localStorage.getItem('gh_token')||'';
-    const url=`${BASE_URL}?token=${encodeURIComponent(tk)}&name=${encodeURIComponent(name)}&platform=${encodeURIComponent(platform)}&cases=${cases}&mode=tester`;
-    h+=`<div class="link-item"><span class="name">${name}</span><span class="url">${url}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${url}');showToast('✓ 已复制 ${name} 的链接')">复制</button></div>`;
+  // Assignments
+  assignments.forEach((a,idx)=>{
+    const link=genLink(a);
+    h+=`<div class="admin-card"><div class="remove" onclick="removeAssignment(${idx})">✕</div>
+    <div class="admin-row">
+      <input placeholder="姓名" value="${a.name}" onchange="assignments[${idx}].name=this.value;saveAssignments();render()">
+      <select onchange="assignments[${idx}].platform=this.value;saveAssignments();render()">
+        ${PLATFORMS.map(p=>`<option ${a.platform===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+      <select onchange="assignments[${idx}].target=this.value;saveAssignments();render()">
+        <option value="multi" ${a.target==='multi'?'selected':''}>③ 多轮修改</option>
+        <option value="gdd" ${a.target==='gdd'?'selected':''}>① GDD复刻</option>
+        <option value="direct" ${a.target==='direct'?'selected':''}>② 直接需求</option>
+      </select>
+    </div>
+    ${a.target!=='multi'?`<div class="checkbox-group">${(a.target==='gdd'?GDD_CASES:DIRECT_CASES).map(c=>{const id=(a.target==='gdd'?'g':'d')+c.num;const checked=(a.cases||[]).includes(id);return`<label><input type="checkbox" ${checked?'checked':''} onchange="toggleCase(${idx},'${id}')"> ${c.num}.${c.name}</label>`}).join('')}</div>`:'<div class="sd" style="margin:0">自动包含全部3轮矛盾指令</div>'}
+    <div class="link-output"><span style="flex:1;word-break:break-all">${link}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${link}');showToast('✓ 已复制')">复制链接</button></div>
+    </div>`;
   });
-  document.getElementById('linkList').innerHTML=h||'<div class="sd">请检查格式</div>';
+
+  h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--dark-mid)">📊</div><div class="st">查看汇总</div></div><div class="sd">切换到「📊 汇总」标签查看所有提交</div></div>`;
+  return h;
 }
 
-// ========== SUBMIT ==========
+function addAssignment(){assignments.push({name:'',platform:PLATFORMS[0],target:'multi',cases:[]});saveAssignments();render()}
+function removeAssignment(i){assignments.splice(i,1);saveAssignments();render()}
+function toggleCase(idx,id){const a=assignments[idx];if(!a.cases)a.cases=[];const i=a.cases.indexOf(id);if(i>=0)a.cases.splice(i,1);else a.cases.push(id);saveAssignments();render()}
+function saveAssignments(){localStorage.setItem('eval-assignments',JSON.stringify(assignments))}
+function genLink(a){
+  const tk=localStorage.getItem('gh_token')||'';
+  const cases=a.target==='multi'?'m1,m2,m3':(a.cases||[]).join(',');
+  return`${BASE_URL}?token=${encodeURIComponent(tk)}&name=${encodeURIComponent(a.name)}&platform=${encodeURIComponent(a.platform)}&target=${a.target}&cases=${cases}&mode=tester`;
+}
+
+// ===== SUBMIT =====
 async function doSubmit(){
   const btn=document.getElementById('submitBtn');
   btn.textContent='⏳ 提交中...';btn.disabled=true;
-  const cases=getCases();
-  const result={name:cfg.name,platform:cfg.platform,time:new Date().toISOString(),items:[]};
-  cases.forEach(c=>{
-    const k=`${c.type}_${c.num}`;
-    const dims=c.type==='multi'?MULTI_DIMS:DIMS;
-    const item={type:c.type,num:c.num,name:c.name||c.scene,scores:{},time:timers[k]||0,note:notes[k]||''};
-    dims.forEach(d=>{item.scores[d.key]=scores[`${k}_${d.key}`]});
-    const valid=Object.values(item.scores).filter(v=>v!==undefined);
-    item.avg=valid.length?(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2):'';
-    result.items.push(item);
-  });
-  const path=`data/${cfg.name}_${cfg.platform}.json`;
-  const ok=await ghPut(path,JSON.stringify(result,null,2));
-  if(ok){
-    btn.textContent='✅ 提交成功！';btn.classList.add('success');
-    showToast('✅ 已提交，感谢测评！');
-  }else{
-    btn.textContent='❌ 提交失败，请重试';btn.disabled=false;
-    showToast('提交失败，请检查网络后重试');
+  const result={name:cfg.name,platform:cfg.platform,target:cfg.target,time:new Date().toISOString(),rounds:[]};
+  
+  if(cfg.target==='multi'){
+    MULTI_ROUNDS.forEach(round=>{
+      const k=`m_${round.num}`;
+      const item={num:round.num,prompt:round.prompt,scores:{},subjective:scores[`${k}_subj`],time:timers[k]||0,issue:fields[`${k}_issue`]||'',note:fields[`${k}_note`]||''};
+      MULTI_DIMS.forEach(d=>{item.scores[d.key]=scores[`${k}_${d.key}`]});
+      const valid=Object.values(item.scores).filter(v=>v!==undefined);
+      item.avg=valid.length?(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2):'';
+      result.rounds.push(item);
+    });
+  } else {
+    const cases=cfg.cases.map(id=>{const t=id[0],n=+id.slice(1);if(t==='g')return{...GDD_CASES[n-1],type:'gdd'};if(t==='d')return{...DIRECT_CASES[n-1],type:'direct'};return null}).filter(Boolean);
+    cases.forEach(c=>{
+      const k=`${c.type}_${c.num}`;
+      const item={type:c.type,num:c.num,name:c.name,scores:{},time:timers[k]||0,note:fields[`${k}_note`]||''};
+      DIMS.forEach(d=>{item.scores[d.key]=scores[`${k}_${d.key}`]});
+      const valid=Object.values(item.scores).filter(v=>v!==undefined);
+      item.avg=valid.length?(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2):'';
+      result.rounds.push(item);
+    });
   }
+  
+  const path=`data/${cfg.name}_${cfg.platform.replace(/[+\/]/g,'_')}.json`;
+  const ok=await ghPut(path,JSON.stringify(result,null,2));
+  if(ok){btn.textContent='✅ 提交成功！';btn.classList.add('success');showToast('✅ 已提交，感谢！')}
+  else{btn.textContent='❌ 失败，重试';btn.disabled=false;showToast('提交失败，请重试')}
 }
 
-// ========== SUMMARY ==========
+// ===== SUMMARY =====
 async function loadSummary(){
   const files=await ghList('data');
-  if(!files.length){document.getElementById('content').innerHTML=`<div class="s"><div class="st">📭 暂无提交数据</div><div class="sd">等待测试人员提交后刷新查看</div></div>`;return}
   const allData=[];
-  for(const f of files){
-    if(!f.name.endsWith('.json'))continue;
-    const d=await ghGet(`data/${f.name}`);
-    if(d)allData.push(d);
+  for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet(`data/${f.name}`);if(d)allData.push(d)}
+  if(!allData.length){document.getElementById('content').innerHTML='<div class="s"><div class="st">📭 暂无提交</div></div>';return}
+  let h=`<div class="s"><div class="sh"><div class="sn" style="background:var(--green)">✓</div><div class="st">已收到 ${allData.length} 份</div></div>
+  <table class="data"><tr><th>测评人</th><th>平台</th><th>目标</th><th>均分</th><th>时间</th></tr>
+  ${allData.map(d=>{const avgs=d.rounds.map(r=>parseFloat(r.avg)).filter(v=>!isNaN(v));const avg=avgs.length?(avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(2):'-';return`<tr><td><b>${d.name}</b></td><td>${d.platform}</td><td>${d.target}</td><td style="color:var(--accent);font-weight:700">${avg}</td><td style="font-size:10px">${new Date(d.time).toLocaleString('zh-CN')}</td></tr>`}).join('')}
+  </table></div>`;
+  // Platform comparison for multi
+  const multiData=allData.filter(d=>d.target==='multi');
+  if(multiData.length>1){
+    h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--blue)">VS</div><div class="st">多轮修改 平台对比</div></div>
+    <table class="data"><tr><th>平台</th><th>意图</th><th>精准</th><th>完成</th><th>质量</th><th>综合</th></tr>
+    ${[...new Set(multiData.map(d=>d.platform))].map(p=>{const pData=multiData.filter(d=>d.platform===p);const dimAvgs=MULTI_DIMS.map(dim=>{const all=pData.flatMap(d=>d.rounds.map(r=>r.scores[dim.key]).filter(v=>v!==undefined));return all.length?(all.reduce((a,b)=>a+b,0)/all.length).toFixed(1):'-'});const totalAvg=pData.flatMap(d=>d.rounds.map(r=>parseFloat(r.avg)).filter(v=>!isNaN(v)));const avg=totalAvg.length?(totalAvg.reduce((a,b)=>a+b,0)/totalAvg.length).toFixed(2):'-';return`<tr><td><b>${p}</b></td>${dimAvgs.map(v=>`<td>${v}</td>`).join('')}<td style="color:var(--accent);font-weight:700">${avg}</td></tr>`}).join('')}
+    </table></div>`;
   }
-  renderSummary(allData);
-}
-
-function renderSummary(allData){
-  let h=`<div class="s"><div class="sh"><div class="sn" style="background:var(--green)">✓</div><div class="st">已收到 ${allData.length} 份提交</div></div>`;
-  h+=`<table class="data"><tr><th>测评人</th><th>平台</th><th>用例数</th><th>均分</th><th>总耗时</th><th>提交时间</th></tr>`;
-  allData.forEach(d=>{
-    const avgs=d.items.map(i=>parseFloat(i.avg)).filter(v=>!isNaN(v));
-    const totalAvg=avgs.length?(avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(2):'-';
-    const totalTime=d.items.reduce((a,i)=>a+(i.time||0),0);
-    h+=`<tr><td><b>${d.name}</b></td><td>${d.platform}</td><td>${d.items.length}</td><td style="color:var(--accent);font-weight:700">${totalAvg}</td><td>${formatTime(totalTime)}</td><td style="font-size:10px">${new Date(d.time).toLocaleString('zh-CN')}</td></tr>`;
-  });
-  h+=`</table></div>`;
-
-  // Platform comparison
-  const platforms=[...new Set(allData.map(d=>d.platform))];
-  if(platforms.length>1){
-    h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--blue)">VS</div><div class="st">平台对比</div></div>`;
-    h+=`<table class="data"><tr><th>平台</th><th>提交数</th><th>综合均分</th></tr>`;
-    platforms.forEach(p=>{
-      const pData=allData.filter(d=>d.platform===p);
-      const allScores=pData.flatMap(d=>d.items.map(i=>parseFloat(i.avg)).filter(v=>!isNaN(v)));
-      const avg=allScores.length?(allScores.reduce((a,b)=>a+b,0)/allScores.length).toFixed(2):'-';
-      h+=`<tr><td><b>${p}</b></td><td>${pData.length}</td><td style="color:var(--accent);font-weight:700">${avg}</td></tr>`;
-    });
-    h+=`</table></div>`;
-  }
-
-  // Export
-  h+=`<div class="s"><button class="mode-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="exportAll()">📊 导出Excel汇总</button></div>`;
+  h+=`<div class="s"><button class="mode-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="exportAll()">📊 导出Excel</button></div>`;
   document.getElementById('content').innerHTML=h;
   window._allData=allData;
 }
 
 function exportAll(){
-  const allData=window._allData||[];
-  const wb=XLSX.utils.book_new();
-  const rows=[];
-  allData.forEach(d=>{d.items.forEach(item=>{
-    const row={'测评人':d.name,'平台':d.platform,'类型':item.type,'编号':item.num,'名称':item.name};
-    Object.entries(item.scores).forEach(([k,v])=>row[k]=v);
-    row['均分']=item.avg;row['耗时(秒)']=item.time;row['备注']=item.note;rows.push(row);
-  })});
+  const allData=window._allData||[];const wb=XLSX.utils.book_new();
+  const rows=[];allData.forEach(d=>{d.rounds.forEach(r=>{const row={'测评人':d.name,'平台':d.platform,'目标':d.target,'编号':r.num,'名称':r.name||`轮${r.num}`};Object.entries(r.scores).forEach(([k,v])=>row[k]=v);row['主观']=r.subjective;row['均分']=r.avg;row['耗时']=r.time;row['问题']=r.issue||'';row['备注']=r.note||'';rows.push(row)})});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'全部数据');
-  // Summary
-  const platforms=[...new Set(allData.map(d=>d.platform))];
-  const sum=[['平台','提交数','综合均分']];
-  platforms.forEach(p=>{const s=allData.filter(d=>d.platform===p).flatMap(d=>d.items.map(i=>parseFloat(i.avg)).filter(v=>!isNaN(v)));sum.push([p,allData.filter(d=>d.platform===p).length,s.length?(s.reduce((a,b)=>a+b,0)/s.length).toFixed(2):'-'])});
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),'平台汇总');
-  XLSX.writeFile(wb,`测评汇总_${new Date().toISOString().slice(0,10)}.xlsx`);
-  showToast('📊 已导出');
+  XLSX.writeFile(wb,`测评汇总_${new Date().toISOString().slice(0,10)}.xlsx`);showToast('📊 已导出')
 }
 
-// ========== INIT ==========
-// Save token from URL to localStorage for future use
-if(P.get('token')&&P.get('token')!==''){localStorage.setItem('gh_token',P.get('token'))}
+// ===== INIT =====
+if(P.get('token'))localStorage.setItem('gh_token',P.get('token'));
+if(cfg.name&&cfg.platform)mode='tester';
 render();
-// Fill token input if exists
-setTimeout(()=>{const ti=document.getElementById('tokenInput');if(ti)ti.value=localStorage.getItem('gh_token')||''},100);
 </script>
 </body>
 </html>
