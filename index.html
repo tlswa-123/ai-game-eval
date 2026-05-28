@@ -96,7 +96,7 @@ table.data th{background:var(--bg);font-weight:600;font-size:9px;text-transform:
 
 <script>
 const REPO='tlswa-123/ai-game-eval';
-const GH_TOKEN=new URLSearchParams(location.search).get('token')||localStorage.getItem('gh_token')||'';
+const GH_TOKEN=localStorage.getItem('gh_token')||new URLSearchParams(location.search).get('token')||'';
 const BASE_URL=location.origin+location.pathname;
 
 // ===== DIMS =====
@@ -185,8 +185,8 @@ function setField(k,v){fields[k]=v}
 // ===== RENDER =====
 function setMode(m){mode=m;render()}
 function render(){
-  const hasTester=cfg.name&&cfg.platforms.length;
-  const modes=hasTester?[['tester','🎮 测评'],['admin','⚙️ 管理'],['summary','📊 汇总']]:[['admin','⚙️ 管理/分发'],['summary','📊 汇总']];
+  const hasTester=cfg.name&&(cfg.platforms.length||cfg.platform);
+  const modes=P.get('mode')==='tester'?[['tester','🎮 测评']]:(hasTester?[['tester','🎮 测评'],['admin','⚙️ 管理'],['summary','📊 汇总']]:[['admin','⚙️ 管理/分发'],['summary','📊 汇总']]);
   document.getElementById('modeBar').innerHTML=modes.map(([k,l])=>`<button class="mode-btn ${mode===k?'active':''}" onclick="setMode('${k}')">${l}</button>`).join('');
   const el=document.getElementById('content');
   if(mode==='tester')el.innerHTML=renderTester();
@@ -362,8 +362,7 @@ function exportAll(){
 }
 
 // ===== INIT =====
-if(P.get('token'))localStorage.setItem('gh_token',P.get('token'));
-if(cfg.name&&cfg.platforms.length)mode='tester';
+if(P.get('token')){localStorage.setItem('gh_token',P.get('token'));const url=new URL(location);url.searchParams.delete('token');history.replaceState(null,'',url)}
 render();
 </script>
 </body>
