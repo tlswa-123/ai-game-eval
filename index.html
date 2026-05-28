@@ -297,7 +297,46 @@ async function doSubmit(){
 // ===== SUMMARY =====
 async function loadSum(){
   const files=await ghList('data');const all=[];
-  for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet('data/'+f.name);if(d)all.push(d)}
+  const fnames=[];for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet('data/'+f.name);if(d){all.push(d);fnames.push(f.name)}}window._files=fnames
+  if(!all.length){document.getElementById('app').innerHTML='<div class="s sd">暂无数据</div>';return}
+  // Separate by target
+  const byTarget={multi:[],gdd:[],direct:[]};
+  all.forEach(d=>{if(byTarget[d.target])byTarget[d.target].push(d);else byTarget.multi.push(d)});
+  let h='<div class="s"><div class="sh"><div class="sn" style="background:var(--green)">'+all.length+'</div><div class="st">'+all.length+' 份提交</div><button class="refresh-btn" onclick="loadSum()" style="margin-left:auto">刷新</button></div></div>';
+  // For each target that has data, render analysis
+  if(byTarget.multi.length) h+=renderTargetAnalysis('③ 多轮修改',byTarget.multi,DIMS_3);
+  if(byTarget.gdd.length) h+=renderTargetAnalysis('① GDD复刻',byTarget.gdd,DIMS_12);
+  if(byTarget.direct.length) h+=renderTargetAnalysis('② 直接需求',byTarget.direct,DIMS_12);
+  h+='<div class="s"><button class="tab active" style="border:none" onclick="expAll()">导出Excel</button></div>';
+  document.getElementById('app').innerHTML=h;window._d=all;
+}h+='<div id="submitList"></div></div>';
+  // Render expandable list
+  setTimeout(()=>{
+    let sl='';
+    all.forEach((d,di)=>{
+      const fileName=window._files?window._files[di]:'';
+      sl+='<div style="border:1px solid var(--border);border-radius:6px;margin-bottom:6px;overflow:hidden">';
+      sl+='<div style="display:flex;align-items:center;padding:8px 12px;cursor:pointer;background:var(--bg)" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">';
+      sl+='<b style="flex:1">'+d.name+'</b>';
+      sl+='<span style="color:var(--dim);font-size:11px;margin-right:8px">'+(d.platforms||[]).join(', ')+'</span>';
+      sl+='<span style="font-size:10px;color:var(--light)">'+new Date(d.time).toLocaleString('zh-CN')+'</span>';
+      sl+='</div>';
+      sl+='<div style="display:none;padding:8px 12px;border-top:1px solid var(--border);font-size:11px">';
+      (d.data||[]).forEach(pd=>{
+        sl+='<div style="margin-bottom:4px"><b>'+pd.platform+'</b>: ';
+        const avgs=(pd.items||[]).map(i=>parseFloat(i.avg)).filter(v=>!isNaN(v));
+        const avg=avgs.length?(avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(2):'-';
+        sl+='均分 <span style="color:var(--accent);font-weight:700">'+avg+'</span> ('+avgs.length+'项)</div>';
+      });
+      sl+='<div style="display:flex;gap:8px;margin-top:6px">';
+      sl+='<button style="padding:3px 10px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:10px;cursor:pointer" onclick="viewSubmit('+di+')">查看详情</button>';
+      sl+='<button style="padding:3px 10px;background:var(--rbg);color:var(--red);border:1px solid var(--red);border-radius:4px;font-size:10px;cursor:pointer" onclick="delSubmit(\''+fileName+'\','+di+')">删除</button>';
+      sl+='</div></div></div>';
+    });
+    document.getElementById('submitList').innerHTML=sl;
+  },0)loadSum(){
+  const files=await ghList('data');const all=[];
+  const fnames=[];for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet('data/'+f.name);if(d){all.push(d);fnames.push(f.name)}}window._files=fnames
   if(!all.length){document.getElementById('app').innerHTML='<div class="s sd">暂无数据</div>';return}
   // Separate by target
   const byTarget={multi:[],gdd:[],direct:[]};
@@ -388,6 +427,30 @@ function renderTargetAnalysis(title,data,dims){
   });
   h+='</div>';
   return h;
+}
+function viewSubmit(idx){
+  const d=window._d[idx];
+  let detail='<div class="s"><button onclick="loadSum()" style="padding:4px 10px;border:1px solid var(--border);background:var(--card);border-radius:4px;font-size:11px;cursor:pointer;margin-bottom:10px">← 返回汇总</button>';
+  detail+='<div class="st">'+d.name+' 的提交详情</div><div class="sd">'+new Date(d.time).toLocaleString('zh-CN')+'</div>';
+  (d.data||[]).forEach(pd=>{
+    detail+='<div style="margin:8px 0 4px;font-weight:700;color:var(--accent)">'+pd.platform+'</div>';
+    detail+='<table class="dt"><tr><th>项目</th><th>均分</th><th>耗时</th><th>备注</th></tr>';
+    (pd.items||[]).forEach(item=>{
+      detail+='<tr><td>'+(item.scene||item.name||'轮'+item.round)+'</td><td style="font-weight:700;color:var(--accent)">'+(item.avg||'-')+'</td><td>'+(item.time||0)+'s</td><td>'+(item.note||'')+'</td></tr>';
+    });
+    detail+='</table>';
+  });
+  detail+='</div>';
+  document.getElementById('app').innerHTML=detail;
+}
+async function delSubmit(fileName,idx){
+  if(!confirm('确定删除这份提交？'))return;
+  if(!fileName){toast('无法删除');return}
+  const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/data/'+fileName,{headers:{Authorization:'token '+TK}});
+  if(!r.ok){toast('删除失败');return}
+  const d=await r.json();
+  const del=await fetch('https://api.github.com/repos/'+REPO+'/contents/data/'+fileName,{method:'DELETE',headers:{Authorization:'token '+TK,'Content-Type':'application/json'},body:JSON.stringify({message:'delete',sha:d.sha})});
+  if(del.ok){toast('已删除');loadSum()}else{toast('删除失败')}
 }
 function expAll(){
   const all=window._d||[];const wb=XLSX.utils.book_new();const rows=[];
