@@ -1,0 +1,411 @@
+{
+  "name": "布局",
+  "platforms": [
+    "我们+GLM5.1",
+    "Replit"
+  ],
+  "target": "multi",
+  "time": "2026-05-28T11:16:03.673Z",
+  "data": [
+    {
+      "platform": "我们+GLM5.1",
+      "items": [
+        {
+          "scene": "场景1：冲突处理",
+          "round": 1,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景1：冲突处理",
+          "round": 2,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景1：冲突处理",
+          "round": 3,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景2：改玩法",
+          "round": 1,
+          "scores": {
+            "intent": 0,
+            "precision": 0,
+            "completeness": 0,
+            "quality": 0
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "0.00"
+        },
+        {
+          "scene": "场景2：改玩法",
+          "round": 2,
+          "scores": {
+            "intent": 0,
+            "precision": 0,
+            "completeness": 0,
+            "quality": 0
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "0.00"
+        },
+        {
+          "scene": "场景2：改玩法",
+          "round": 3,
+          "scores": {
+            "intent": 0,
+            "precision": 0,
+            "completeness": 0,
+            "quality": 0
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "0.00"
+        },
+        {
+          "scene": "场景3：改美术",
+          "round": 1,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景3：改美术",
+          "round": 2,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景3：改美术",
+          "round": 3,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景4：多条指令",
+          "round": 1,
+          "scores": {
+            "intent": 0,
+            "precision": 0,
+            "completeness": 0,
+            "quality": 0
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "0.00"
+        },
+        {
+          "scene": "场景4：多条指令",
+          "round": 2,
+          "scores": {
+            "intent": 0,
+            "precision": 0,
+            "completeness": 0,
+            "quality": 0
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "0.00"
+        },
+        {
+          "scene": "场景4：多条指令",
+          "round": 3,
+          "scores": {
+            "intent": 0,
+            "precision": 0,
+            "completeness": 0,
+            "quality": 0
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "0.00"
+        },
+        {
+          "scene": "场景5：模糊反馈",
+          "round": 1,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景5：模糊反馈",
+          "round": 2,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        },
+        {
+          "scene": "场景5：模糊反馈",
+          "round": 3,
+          "scores": {
+            "intent": 1,
+            "precision": 1,
+            "completeness": 1,
+            "quality": 1
+          },
+          "time": 0,
+          "note": "test1",
+          "avg": "1.00"
+        }
+      ]
+    },
+    {
+      "platform": "Replit",
+      "items": [
+        {
+          "scene": "场景1：冲突处理",
+          "round": 1,
+          "scores": {
+            "intent": 2,
+            "precision": 2,
+            "completeness": 2,
+            "quality": 2
+          },
+          "time": 355,
+          "note": "test2",
+          "avg": "2.00"
+        },
+        {
+          "scene": "场景1：冲突处理",
+          "round": 2,
+          "scores": {
+            "intent": 2,
+            "precision": 2,
+            "completeness": 2,
+            "quality": 2
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "2.00"
+        },
+        {
+          "scene": "场景1：冲突处理",
+          "round": 3,
+          "scores": {
+            "intent": 2,
+            "precision": 2,
+            "completeness": 2,
+            "quality": 2
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "2.00"
+        },
+        {
+          "scene": "场景2：改玩法",
+          "round": 1,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景2：改玩法",
+          "round": 2,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景2：改玩法",
+          "round": 3,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景3：改美术",
+          "round": 1,
+          "scores": {
+            "intent": 2,
+            "precision": 2,
+            "completeness": 2,
+            "quality": 2
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "2.00"
+        },
+        {
+          "scene": "场景3：改美术",
+          "round": 2,
+          "scores": {
+            "intent": 2,
+            "precision": 2,
+            "completeness": 2,
+            "quality": 2
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "2.00"
+        },
+        {
+          "scene": "场景3：改美术",
+          "round": 3,
+          "scores": {
+            "intent": 2,
+            "precision": 2,
+            "completeness": 2,
+            "quality": 2
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "2.00"
+        },
+        {
+          "scene": "场景4：多条指令",
+          "round": 1,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景4：多条指令",
+          "round": 2,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景4：多条指令",
+          "round": 3,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景5：模糊反馈",
+          "round": 1,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景5：模糊反馈",
+          "round": 2,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        },
+        {
+          "scene": "场景5：模糊反馈",
+          "round": 3,
+          "scores": {
+            "intent": 3,
+            "precision": 3,
+            "completeness": 3,
+            "quality": 3
+          },
+          "time": 0,
+          "note": "test2",
+          "avg": "3.00"
+        }
+      ]
+    }
+  ]
+}
