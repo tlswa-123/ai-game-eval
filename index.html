@@ -239,7 +239,7 @@ function adminH(){
       h+='<div class="cg">'+SCENES.map(s=>'<label><input type="checkbox" '+((a.scenes||[]).includes(s.id)?'checked':'')+' onchange="togA('+i+',\'scenes\',\''+s.id+'\')">'+s.name.replace('场景','S')+'</label>').join('')+'</div>';
     }else{
       const list=a.target==='gdd'?GDD_CASES:DIRECT_CASES;
-      h+='<div class="lbl">Case<span onclick="assigns['+i+'].cases=list.map(c=>(a.target===\'gdd\'?\'g\':\'d\')+c.num);saveA();render()">全选</span><span class="cl" onclick="assigns['+i+'].cases=[];saveA();render()">清空</span></div>';
+      h+='<div class="lbl">Case<span onclick="assigns['+i+'].selAllC('+i+')">全选</span><span class="cl" onclick="assigns['+i+'].cases=[];saveA();render()">清空</span></div>';
       h+='<div class="cg">'+list.map(c=>{const id=(a.target==='gdd'?'g':'d')+c.num;return'<label><input type="checkbox" '+((a.cases||[]).includes(id)?'checked':'')+' onchange="togA('+i+',\'cases\',\''+id+'\')">'+c.num+'.'+c.name+'</label>'}).join('')+'</div>';
     }
     h+='<div class="lo"><span style="flex:1">'+(link||'填姓名+选平台')+'</span>'+(link?'<button class="cp" onclick="navigator.clipboard.writeText(\''+link+'\');toast(\'已复制\')">复制</button>':'')+'</div></div>';
@@ -250,6 +250,7 @@ function addA(){assigns.push({name:'',platforms:[],scenes:SCENES.map(s=>s.id),ca
 function rmA(i){assigns.splice(i,1);saveA();render()}
 function togA(i,f,v){const a=assigns[i];if(!a[f])a[f]=[];const x=a[f].indexOf(v);if(x>=0)a[f].splice(x,1);else a[f].push(v);saveA();render()}
 function rmPlat(p){const i=custPlats.indexOf(p);if(i>=0){custPlats.splice(i,1);localStorage.setItem('ep3',JSON.stringify(custPlats));assigns.forEach(a=>{if(a.platforms){const x=a.platforms.indexOf(p);if(x>=0)a.platforms.splice(x,1)}});saveA();render()}}
+function selAllC(i){const a=assigns[i];const list=a.target==='gdd'?GDD_CASES:DIRECT_CASES;a.cases=list.map(c=>(a.target==='gdd'?'g':'d')+c.num);saveA();render()}
 function addP(i){const el=document.getElementById('np'+i);const n=el.value.trim();if(!n)return;if(!custPlats.includes(n)&&!DEF_PLATS.includes(n)){custPlats.push(n);localStorage.setItem('ep3',JSON.stringify(custPlats))}if(!assigns[i].platforms)assigns[i].platforms=[];if(!assigns[i].platforms.includes(n))assigns[i].platforms.push(n);saveA();render()}
 function saveA(){localStorage.setItem('ea5',JSON.stringify(assigns))}
 function mkLink(a){if(!a.name||!(a.platforms||[]).length)return'';const tk=localStorage.getItem('gh_token')||'';let url=BASE+'?token='+encodeURIComponent(tk)+'&name='+encodeURIComponent(a.name)+'&platforms='+encodeURIComponent(a.platforms.join(','))+'&target='+a.target;if(a.target==='multi')url+='&scenes='+encodeURIComponent((a.scenes||[]).join(','));else url+='&cases='+encodeURIComponent((a.cases||[]).join(','));return url+'&mode=tester'}
