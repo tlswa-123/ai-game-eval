@@ -7,362 +7,203 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#fafaf9;--card:#fff;--border:#e7e5e4;--text:#1c1917;--text-dim:#78716c;--text-light:#a8a29e;--accent:#ea580c;--accent-light:#fff7ed;--accent-border:#fed7aa;--dark:#1c1917;--dark-mid:#44403c;--green:#166534;--green-bg:#dcfce7;--yellow:#92400e;--yellow-bg:#fef3c7;--red:#dc2626;--red-bg:#fef2f2;--blue:#1e40af;--blue-bg:#dbeafe}
+:root{--bg:#fafaf9;--card:#fff;--border:#e7e5e4;--text:#1c1917;--dim:#78716c;--light:#a8a29e;--accent:#ea580c;--abg:#fff7ed;--abr:#fed7aa;--dark:#1c1917;--green:#166534;--gbg:#dcfce7;--yellow:#92400e;--ybg:#fef3c7;--red:#dc2626;--rbg:#fef2f2;--blue:#1e40af;--bbg:#dbeafe}
 body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;padding:20px 16px}
-.w{max-width:960px;margin:0 auto}
-.hd{text-align:center;padding:24px 20px;background:linear-gradient(135deg,#1c1917,#44403c);border-radius:16px;color:#fff;margin-bottom:20px}
+.w{max-width:920px;margin:0 auto}
+.hd{text-align:center;padding:24px;background:linear-gradient(135deg,#1c1917,#44403c);border-radius:16px;color:#fff;margin-bottom:20px}
 .hd h1{font-size:18px;font-weight:700;margin:4px 0}.hd p{font-size:11px;opacity:.5}
 .badge{display:inline-block;background:var(--accent);padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;margin-bottom:4px}
-.mode-bar{display:flex;gap:6px;margin-bottom:16px;justify-content:center;flex-wrap:wrap}
-.mode-btn{padding:8px 18px;border:1px solid var(--border);background:var(--card);border-radius:9px;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s}
-.mode-btn.active{background:var(--dark);color:#fff;border-color:var(--dark)}
-.mode-btn:hover:not(.active){border-color:var(--accent)}
+.tabs{display:flex;gap:4px;justify-content:center;margin-bottom:16px}
+.tab{padding:8px 18px;border:1px solid var(--border);background:var(--card);border-radius:9px;cursor:pointer;font-size:12px;font-weight:500}
+.tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}
 .s{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
 .sh{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .sn{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;background:var(--accent)}
 .st{font-size:14px;font-weight:700}
-.sd{color:var(--text-dim);font-size:11px;margin-bottom:8px;line-height:1.7}
-.t{display:inline-block;padding:1px 7px;border-radius:6px;font-size:9px;font-weight:500}
-.prompt-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:10px;line-height:1.6;cursor:pointer;position:relative}
-.prompt-box::after{content:'📋 复制';position:absolute;top:4px;right:8px;font-size:9px;color:var(--accent);opacity:0;transition:opacity .2s}
-.prompt-box:hover::after{opacity:1}
-.prompt-box.copied::after{content:'✓';color:var(--green);opacity:1}
-/* Score */
-.score-row{display:flex;align-items:center;gap:5px;margin-bottom:4px}
-.score-label{font-size:10px;color:var(--text-dim);width:44px;flex-shrink:0}
+.sd{color:var(--dim);font-size:11px;margin-bottom:8px;line-height:1.7}
+.prompt-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:11px;margin-bottom:10px;cursor:pointer;position:relative;line-height:1.6}
+.prompt-box:hover::after{content:'copy';position:absolute;top:4px;right:8px;font-size:9px;color:var(--accent)}
+.prompt-box.copied::after{content:'ok';color:var(--green)}
+.score-row{display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.score-label{font-size:10px;color:var(--dim);width:44px}
 .score-btns{display:flex;gap:2px}
-.score-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--card);color:var(--text-dim);border-radius:6px;cursor:pointer;font-size:10px;font-weight:600;transition:all .15s;position:relative}
-.score-btn:hover{border-color:var(--text-dim)}
-.score-btn.active.s0{background:var(--red-bg);border-color:var(--red);color:var(--red)}
-.score-btn.active.s1{background:var(--yellow-bg);border-color:#d97706;color:var(--yellow)}
-.score-btn.active.s2{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
-.score-btn.active.s3{background:var(--green-bg);border-color:var(--green);color:var(--green)}
-.score-btn .tip{display:none;position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--dark);border-radius:8px;padding:7px 9px;font-size:10px;color:#fff;white-space:normal;width:160px;z-index:100;line-height:1.4;margin-bottom:5px;box-shadow:0 4px 12px rgba(0,0,0,.15);pointer-events:none;font-weight:400}
-.score-btn:hover .tip{display:block}
-/* Extra fields */
-.field-row{display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap}
-.field-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:10px;flex:1;min-width:80px}
+.score-btn{width:28px;height:28px;border:1px solid var(--border);background:var(--card);color:var(--dim);border-radius:6px;cursor:pointer;font-size:10px;font-weight:600;position:relative}
+.score-btn:hover{border-color:var(--dim)}
+.score-btn.a0{background:var(--rbg);border-color:var(--red);color:var(--red)}
+.score-btn.a1{background:var(--ybg);border-color:#d97706;color:var(--yellow)}
+.score-btn.a2{background:var(--bbg);border-color:var(--blue);color:var(--blue)}
+.score-btn.a3{background:var(--gbg);border-color:var(--green);color:var(--green)}
+.score-btn .tp{display:none;position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:var(--dark);border-radius:6px;padding:6px 8px;font-size:9px;color:#fff;width:150px;z-index:99;line-height:1.4;font-weight:400;white-space:normal}
+.score-btn:hover .tp{display:block}
+.field-row{display:flex;gap:6px;margin-top:5px;align-items:center;flex-wrap:wrap}
+.field-label{font-size:9px;color:var(--light);width:36px}
+.field-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:10px;flex:1;color:var(--text)}
 .field-input:focus{outline:none;border-color:var(--accent)}
-.field-textarea{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-size:10px;width:100%;min-height:36px;resize:vertical;font-family:inherit}
-.field-textarea:focus{outline:none;border-color:var(--accent)}
-.field-label{font-size:9px;color:var(--text-light);min-width:44px}
-/* Timer */
-.timer-widget{display:flex;align-items:center;gap:4px}
-.timer-display{font-family:ui-monospace,monospace;font-size:12px;color:var(--accent);min-width:36px}
-.timer-btn{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
-.timer-btn:hover{border-color:var(--accent)}
-/* Submit */
-.submit-bar{position:sticky;bottom:0;background:var(--card);border:1px solid var(--border);padding:12px 16px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;border-radius:12px;box-shadow:0 -2px 12px rgba(0,0,0,.04)}
-.submit-btn{background:var(--accent);color:#fff;border:none;padding:11px 28px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
-.submit-btn:hover{opacity:.9}.submit-btn:disabled{opacity:.4;cursor:not-allowed}
-.submit-btn.success{background:var(--green)}
-/* Admin */
-.admin-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;position:relative}
-.admin-card .remove{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--red)}
-.admin-card .remove:hover{background:var(--red-bg)}
+.timer-w{display:flex;align-items:center;gap:4px}
+.timer-d{font-family:monospace;font-size:12px;color:var(--accent);width:36px}
+.timer-b{width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center}
+.submit-bar{position:sticky;bottom:0;background:var(--card);border:1px solid var(--border);padding:12px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;border-radius:12px;box-shadow:0 -2px 8px rgba(0,0,0,.03)}
+.submit-btn{background:var(--accent);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
+.submit-btn:disabled{opacity:.4}
+.admin-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;position:relative}
+.admin-card .rm{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--red)}
 .admin-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
-.admin-row input,.admin-row select{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text)}
+.admin-row input,.admin-row select{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px}
 .admin-row input:focus,.admin-row select:focus{outline:none;border-color:var(--accent)}
-.admin-row input{width:100px}
-.admin-row select{min-width:120px}
-.checkbox-group{display:flex;gap:6px;flex-wrap:wrap}
-.checkbox-group label{display:flex;align-items:center;gap:3px;font-size:10px;cursor:pointer;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--card)}
-.checkbox-group label:has(input:checked){background:var(--accent-light);border-color:var(--accent-border);color:var(--accent)}
-.checkbox-group input{display:none}
-.link-output{margin-top:8px;padding:8px 10px;background:var(--card);border:1px solid var(--accent-border);border-radius:6px;font-size:10px;word-break:break-all;color:var(--text-dim);display:flex;align-items:center;gap:8px}
-.link-output .copy-btn{padding:4px 10px;background:var(--accent);border:none;border-radius:5px;font-size:10px;cursor:pointer;color:#fff;white-space:nowrap}
-/* Table */
-table.data{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
-table.data th,table.data td{padding:6px 8px;border:1px solid var(--border);text-align:center}
-table.data th{background:var(--bg);font-weight:600;font-size:9px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-dim)}
-/* Toast */
+.cg{display:flex;gap:5px;flex-wrap:wrap;margin:4px 0}
+.cg label{display:flex;align-items:center;gap:3px;font-size:10px;cursor:pointer;padding:3px 7px;border-radius:5px;border:1px solid var(--border);background:var(--card)}
+.cg label:has(input:checked){background:var(--abg);border-color:var(--abr);color:var(--accent);font-weight:500}
+.cg input{display:none}
+.link-out{margin-top:8px;padding:8px;background:var(--card);border:1px solid var(--abr);border-radius:6px;font-size:10px;display:flex;align-items:center;gap:6px;word-break:break-all;color:var(--dim)}
+.link-out .cp{padding:4px 10px;background:var(--accent);border:none;border-radius:5px;font-size:10px;cursor:pointer;color:#fff;white-space:nowrap}
+.section-label{font-size:10px;font-weight:600;margin:8px 0 3px;color:var(--dim)}
+.section-label span{color:var(--accent);cursor:pointer;margin-left:6px}
+.section-label .cl{color:var(--light);margin-left:4px;cursor:pointer}
+table.dt{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
+table.dt th,table.dt td{padding:5px 7px;border:1px solid var(--border);text-align:center}
+table.dt th{background:var(--bg);font-size:9px;font-weight:600;color:var(--dim)}
+.plat-hd{margin:16px 0 8px;padding:8px 12px;background:var(--dark);color:#fff;border-radius:8px;font-size:13px;font-weight:600}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--dark);color:#fff;padding:10px 16px;border-radius:10px;font-size:12px;opacity:0;transform:translateY(10px);transition:all .3s;z-index:9999}
 .toast.show{opacity:1;transform:translateY(0)}
-.loading{text-align:center;padding:40px;color:var(--text-dim);font-size:13px}
-@media(max-width:600px){.admin-row{flex-direction:column;align-items:stretch}.admin-row input,.admin-row select{width:100%}}
 </style>
 </head>
 <body>
 <div class="w">
-<div class="hd">
-  <div class="badge">v3.0 协作版</div>
-  <h1 id="pageTitle">AI 游戏生成能力测评</h1>
-  <p id="pageSub"></p>
-</div>
-<div class="mode-bar" id="modeBar"></div>
-<div id="content"></div>
+<div class="hd"><div class="badge">v3.0</div><h1 id="title">AI 游戏测评</h1><p id="sub"></p></div>
+<div class="tabs" id="tabs"></div>
+<div id="app"></div>
 </div>
 <div class="toast" id="toast"></div>
-
 <script>
-const REPO='tlswa-123/ai-game-eval';
-const GH_TOKEN=localStorage.getItem('gh_token')||new URLSearchParams(location.search).get('token')||'';
-const BASE_URL=location.origin+location.pathname;
-
-// ===== DIMS =====
-const DIMS=[
-{key:'stability',short:'功能',scores:['致命bug无法启动','能运行但核心异常','核心正常小瑕疵','零Bug稳定']},
-{key:'visual',short:'视觉',scores:['元素缺失','可辨识不协调','统一清晰','有点睛设计']},
-{key:'audio',short:'音效',scores:['无/严重问题','有但瑕疵','完整契合','调动情绪']},
-{key:'faithfulness',short:'还原',scores:['严重跑题','有遗漏','全部实现','完整+扩展']},
-{key:'gameplay',short:'玩法',scores:['机制不成立','能玩但失衡','合理均衡','有惊喜']},
-{key:'subjective',short:'主观',scores:['想关掉','无感','想收藏','想分享']}
-];
-const MULTI_DIMS=[
-{key:'intent',short:'意图',scores:['答非所问','方向对有偏差','准确理解','精确+考虑关联']},
-{key:'precision',short:'精准',scores:['改错地方','牵连/新Bug','精准无Bug','精准+优化']},
-{key:'completeness',short:'完成',scores:['没执行','一小部分','80%完成','全部完成']},
-{key:'quality',short:'质量',scores:['改崩了','质量下降','持平/提升','明显变好']}
-];
-
-// ===== CASES =====
-const PLATFORMS=['我们+Claude4.7','我们+GLM5.1','WB+Claude4.7','WB+GLM5.1','Astrocade','Replit'];
+const REPO='tlswa-123/ai-game-eval',TK=localStorage.getItem('gh_token')||new URLSearchParams(location.search).get('token')||'';
+const BASE=location.origin+location.pathname;
+const MULTI_DIMS=[{k:'intent',s:'意图',d:['答非所问','方向对有偏差','准确理解','精确+关联']},{k:'precision',s:'精准',d:['改错地方','牵连/新Bug','精准无Bug','精准+优化']},{k:'completeness',s:'完成',d:['没执行','一小部分','80%完成','全部完成']},{k:'quality',s:'质量',d:['改崩了','质量下降','持平/提升','明显变好']}];
+const SCENES=[{id:'s1',name:'场景1：冲突处理',rounds:[{p:'消除后不要再生成新水果了，让格子慢慢清空就过关。做成无尽模式让玩家能一直玩停不下来',n:'不补水果vs无尽矛盾'},{p:'把格子改成6x6但每行只能放5个水果',n:'6列vs每行5个矛盾'},{p:'把水果种类从6种加到12种，同时要求3个相同的连成一排才能消除',n:'12种极难凑3连'}]},{id:'s2',name:'场景2：改玩法',rounds:[{p:'把无尽模式改成60秒限时模式，时间到显示最终得分',n:''},{p:'加一个combo连击系统，连续消除3次以上额外加50分，显示combo x3文字',n:''},{p:'加一个特殊道具，满足特定条件时生成，点击可消除周围一圈',n:''}]},{id:'s3',name:'场景3：改美术',rounds:[{p:'把所有元素图标换成宝石主题',n:''},{p:'背景换成太空星空主题，深色的',n:''},{p:'整体画风从卡通改成像素复古风格',n:''}]},{id:'s4',name:'场景4：多条指令',rounds:[{p:'帮我改三个地方：1.背景改成黑色 2.加个60秒倒计时 3.分数字体放大两倍',n:''},{p:'再改三个：1.加操作音效 2.动画改成爆炸粒子效果 3.加一个历史最高分显示',n:''},{p:'最后改两个：1.加一个暂停按钮在右上角 2.加一个重新开始按钮在暂停旁边',n:''}]},{id:'s5',name:'场景5：模糊反馈',rounds:[{p:'感觉不太好玩',n:''},{p:'太简单了，没什么挑战',n:''},{p:'颜色太多了眼花',n:''}]}];
 const MULTI_BASE='做个水果三消游戏，8x8的格子，点击两个相邻水果交换位置，3个以上同类水果连成一排就消除，消除后上面的水果掉下来补位，要有分数显示和连击combo效果';
-const MULTI_ROUNDS=[
-  {num:1,prompt:'消除后不要再生成新水果了，让格子慢慢清空就过关。做成无尽模式让玩家能一直玩停不下来',conflict:'不补水果→必然清空结束 vs 无尽→不能结束'},
-  {num:2,prompt:'把格子改成6x6但每行只能放5个水果',conflict:'6列格子 vs 每行只放5个，空间定义矛盾'},
-  {num:3,prompt:'把水果种类从6种加到12种，同时要求3个相同的连成一排才能消除',conflict:'12种塞进8x8=64格，每种平均5.3个，极难凑出3连'}
-];
-
-const GDD_CASES=[
-{num:1,name:'对对连消',difficulty:'简单',prompt:'请根据GDD复刻：对对连消（连连看·暖冬牧场卡通）'},
-{num:2,name:'奇妙不停消',difficulty:'简单',prompt:'请根据GDD复刻：奇妙不停消（推牌滑动·中式扁平）'},
-{num:3,name:'挪一挪大师',difficulty:'简单',prompt:'请根据GDD复刻：挪一挪大师（方向逃离·Low-Poly）'},
-{num:4,name:'旅行餐车',difficulty:'简单',prompt:'请根据GDD复刻：旅行餐车（合成经营·卡通）'},
-{num:5,name:'最美消消消',difficulty:'简单',prompt:'请根据GDD复刻：最美消消消（泡泡龙·宇宙星空）'},
-{num:6,name:'星星喜消消',difficulty:'简单',prompt:'请根据GDD复刻：星星喜消消（星星消除）'},
-{num:7,name:'收贝经典方块',difficulty:'中等',prompt:'请根据GDD复刻：收贝经典方块（俄罗斯方块·像素）'},
-{num:8,name:'密室消除7',difficulty:'中等',prompt:'请根据GDD复刻：密室消除7（三消·cascade）'},
-{num:9,name:'萌小贝迷你小镇',difficulty:'较难',prompt:'请根据GDD复刻：萌小贝迷你小镇（多玩法）'},
-{num:10,name:'吃碰杠胡了',difficulty:'较难',prompt:'请根据GDD复刻：吃碰杠胡了（2.5D堆叠）'}
-];
-const DIRECT_CASES=[
-{num:1,name:'连连看',difficulty:'简单',prompt:'做个连连看游戏，网格里找两个相同图案，不超过两个拐角的路径连起来就消除'},
-{num:2,name:'方向逃离',difficulty:'简单',prompt:'做个解谜消除游戏，棋盘上有带方向箭头的动物，点击沿方向飞出边界消除'},
-{num:3,name:'中式水墨',difficulty:'简单',prompt:'做一个中国风水墨画风格的休闲游戏，宣纸背景，墨色晕染'},
-{num:4,name:'泡泡龙',difficulty:'简单',prompt:'做个泡泡龙游戏，清新卡通。从底部发射泡泡，3个同色消除'},
-{num:5,name:'合成大西瓜',difficulty:'简单',prompt:'做一个合成大西瓜类游戏，两个相同水果碰到合成更大的'},
-{num:6,name:'星星消除',difficulty:'简单',prompt:'太空主题消除，点击相连同色方块消除，要有combo'},
-{num:7,name:'推牌消除',difficulty:'中等',prompt:'麻将消除，滑动行列让相同牌相邻配对消除'},
-{num:8,name:'俄罗斯方块',difficulty:'中等',prompt:'像素复古俄罗斯方块，方块下落控制旋转填满消行'},
-{num:9,name:'宝石三消',difficulty:'中等',prompt:'宝石三消，3D圆润风格，交换相邻宝石3连消除'},
-{num:10,name:'液体排序',difficulty:'中等',prompt:'极简液体排序，纯黑底白轮廓试管，5色液体'},
-{num:11,name:'赛博朋克',difficulty:'中等',prompt:'赛博朋克霓虹风格游戏，深黑底霓虹发光'},
-{num:12,name:'塔防',difficulty:'较难',prompt:'卡通扁平塔防，3种塔10波递增有Boss'},
-{num:13,name:'射击',difficulty:'较难',prompt:'赛博朋克太空射击，飞船滑动自动射击'},
-{num:14,name:'跑酷',difficulty:'较难',prompt:'手绘涂鸦横版跑酷，自动跑点击跳跃'},
-{num:15,name:'堆叠点消',difficulty:'较难',prompt:'2D层叠消除，遮挡点击飞入7格槽凑3消除'}
-];
-
-// ===== STATE =====
-const P=new URLSearchParams(location.search);
-let mode=P.get('mode')||'admin';
-let cfg={name:P.get('name')||'',platform:P.get('platform')||'',platforms:(P.get('platforms')||P.get('platform')||'').split(',').filter(Boolean),target:P.get('target')||'multi',cases:(P.get('cases')||'').split(',').filter(Boolean)};
-let scores={},timers={},notes={},fields={},activeTimers={};
-
-// ===== GITHUB =====
-async function ghPut(path,content){
-  let sha='';
-  try{const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{headers:{'Authorization':'token '+GH_TOKEN}});if(r.ok){sha=(await r.json()).sha}}catch(e){}
-  const body={message:`submit: ${cfg.name} ${cfg.platform}`,content:btoa(unescape(encodeURIComponent(content)))};
-  if(sha)body.sha=sha;
-  const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{method:'PUT',headers:{'Authorization':'token '+GH_TOKEN,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  return r.ok;
-}
-async function ghList(dir){const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${dir}`,{headers:{'Authorization':'token '+GH_TOKEN}});if(!r.ok)return[];return r.json()}
-async function ghGet(path){const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{headers:{'Authorization':'token '+GH_TOKEN}});if(!r.ok)return null;const d=await r.json();return JSON.parse(decodeURIComponent(escape(atob(d.content))))}
-
-// ===== UTILS =====
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function copyText(el,text){navigator.clipboard.writeText(text);if(el){el.classList.add('copied');setTimeout(()=>el.classList.remove('copied'),1200)}}
-function formatTime(s){return`${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`}
-function startTimer(k){if(activeTimers[k])return;if(!timers[k])timers[k]=0;activeTimers[k]=setInterval(()=>{timers[k]++;const el=document.getElementById('t-'+k);if(el)el.textContent=formatTime(timers[k])},1000)}
-function stopTimer(k){if(activeTimers[k]){clearInterval(activeTimers[k]);delete activeTimers[k]}}
-function resetTimer(k){stopTimer(k);timers[k]=0;const el=document.getElementById('t-'+k);if(el)el.textContent='0:00'}
-function setScore(k,v){scores[k]=v;document.querySelectorAll(`[data-k="${k}"]`).forEach(b=>b.classList.toggle('active',+b.dataset.v===v))}
-function setField(k,v){fields[k]=v}
-
-// ===== RENDER =====
-function setMode(m){mode=m;render()}
+const DEF_PLATS=['我们+Claude4.7','我们+GLM5.1','WB+Claude4.7','WB+GLM5.1','Astrocade','Replit','TapTap制造'];
+let custPlats=JSON.parse(localStorage.getItem('ep')||'[]');
+function allPlats(){return[...DEF_PLATS,...custPlats]}
+const U=new URLSearchParams(location.search);
+if(U.get('token')){localStorage.setItem('gh_token',U.get('token'));const u=new URL(location);u.searchParams.delete('token');history.replaceState(null,'',u)}
+let mode=U.get('mode')||'admin';
+let cfg={name:U.get('name')||'',platforms:(U.get('platforms')||'').split(',').filter(Boolean),target:U.get('target')||'multi',scenes:(U.get('scenes')||'').split(',').filter(Boolean)};
+let scores={},timers={},fields={},at={};
+// GitHub
+async function ghPut(path,data){let sha='';try{const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{headers:{Authorization:'token '+TK}});if(r.ok)sha=(await r.json()).sha}catch(e){}const b={message:'submit',content:btoa(unescape(encodeURIComponent(data)))};if(sha)b.sha=sha;return(await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`,{method:'PUT',headers:{Authorization:'token '+TK,'Content-Type':'application/json'},body:JSON.stringify(b)})).ok}
+async function ghList(d){const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${d}`,{headers:{Authorization:'token '+TK}});return r.ok?r.json():[]}
+async function ghGet(p){const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${p}`,{headers:{Authorization:'token '+TK}});if(!r.ok)return null;const d=await r.json();return JSON.parse(decodeURIComponent(escape(atob(d.content))))}
+// Utils
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2e3)}
+function cp(el,t){navigator.clipboard.writeText(t);el.classList.add('copied');setTimeout(()=>el.classList.remove('copied'),1200)}
+function fmt(s){return Math.floor(s/60)+':'+(s%60+'').padStart(2,'0')}
+function timerStart(k){if(at[k])return;if(!timers[k])timers[k]=0;at[k]=setInterval(()=>{timers[k]++;const e=document.getElementById('tm_'+k);if(e)e.textContent=fmt(timers[k])},1e3)}
+function timerStop(k){if(at[k]){clearInterval(at[k]);delete at[k]}}
+function timerReset(k){timerStop(k);timers[k]=0;const e=document.getElementById('tm_'+k);if(e)e.textContent='0:00'}
+function sc(k,v){scores[k]=v;document.querySelectorAll(`[data-k="${k}"]`).forEach(b=>{b.className='score-btn'+(scores[k]==+b.dataset.v?' a'+b.dataset.v:'')})}
+// Render
+function go(m){mode=m;render()}
 function render(){
-  const hasTester=cfg.name&&(cfg.platforms.length||cfg.platform);
-  const modes=P.get('mode')==='tester'?[['tester','🎮 测评']]:(hasTester?[['tester','🎮 测评'],['admin','⚙️ 管理'],['summary','📊 汇总']]:[['admin','⚙️ 管理/分发'],['summary','📊 汇总']]);
-  document.getElementById('modeBar').innerHTML=modes.map(([k,l])=>`<button class="mode-btn ${mode===k?'active':''}" onclick="setMode('${k}')">${l}</button>`).join('');
-  const el=document.getElementById('content');
-  if(mode==='tester')el.innerHTML=renderTester();
-  else if(mode==='admin')el.innerHTML=renderAdmin();
-  else{el.innerHTML='<div class="loading">⏳ 加载中...</div>';loadSummary()}
-  document.getElementById('pageSub').textContent=hasTester?`${cfg.name} · ${cfg.platforms.join(' / ')}`:'';
+  const isTester=mode==='tester'&&cfg.name&&cfg.platforms.length;
+  document.getElementById('tabs').innerHTML=isTester?'':`<button class="tab ${mode==='admin'?'active':''}" onclick="go('admin')">管理/分发</button><button class="tab ${mode==='summary'?'active':''}" onclick="go('summary')">汇总</button>`;
+  document.getElementById('sub').textContent=isTester?cfg.name+' | '+cfg.platforms.join(', '):'';
+  if(mode==='admin')document.getElementById('app').innerHTML=adminHTML();
+  else if(mode==='summary'){document.getElementById('app').innerHTML='<div class="s sd" style="text-align:center;padding:30px">加载中...</div>';loadSum()}
+  else document.getElementById('app').innerHTML=testerHTML();
 }
-
 // ===== TESTER =====
-function renderTester(){
-  if(!cfg.name)return'<div class="s"><div class="st">👋 请通过管理员分发的链接进入</div></div>';
-  const isMulti=cfg.target==='multi';
-  let h='';
-
-  // Instructions
-  h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--dark)">📋</div><div class="st">你的测评任务</div></div>
-  <div class="sd" style="line-height:2"><b>测评人：</b>${cfg.name} &nbsp;|&nbsp; <b>平台：</b>${cfg.platform} &nbsp;|&nbsp; <b>目标：</b>${isMulti?'③多轮修改（3轮矛盾指令）':'①②生成测评'}</div>
-  <div class="sd" style="background:var(--bg);padding:10px 12px;border-radius:8px;line-height:2">
-    <b>步骤：</b><br>
-    ${isMulti?`① 用下方基础Prompt在 <b>${cfg.platform}</b> 生成游戏<br>② 按顺序发送3轮修改指令（注意：指令故意包含矛盾）<br>③ 每轮评价AI的处理能力（4维度 + 主观 + 问题记录）<br>④ 全部完成后点「提交」`
-    :`① 复制Prompt → 在 <b>${cfg.platform}</b> 生成游戏<br>② 体验游戏后打6个维度分（0-3）<br>③ 全部完成后点「提交」`}
-  </div></div>`;
-
-  // Rubric
-  const dims=isMulti?MULTI_DIMS:DIMS;
-  h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--yellow)">📏</div><div class="st">评分标准</div></div>
-  <table class="data"><tr><th>维度</th><th style="color:var(--red)">0 不可用</th><th style="color:var(--yellow)">1 及格</th><th style="color:var(--blue)">2 好用</th><th style="color:var(--green)">3 超预期</th></tr>
-  ${dims.map(d=>`<tr><td><b>${d.short}</b></td>${d.scores.map(s=>`<td style="font-size:10px">${s}</td>`).join('')}</tr>`).join('')}
-  </table></div>`;
-
-  if(isMulti){
-    // Base prompt
-    h+=`<div class="s" style="border-color:var(--accent-border);background:var(--accent-light)"><div class="sh"><div class="sn" style="background:var(--dark)">★</div><div class="st">第一步：生成基础游戏</div></div>
-    <div class="sd">在 <b>${cfg.platform}</b> 中发送：</div>
-    <div class="prompt-box" style="background:#fff" onclick="copyText(this,'${MULTI_BASE}')">${MULTI_BASE}</div></div>`;
-
-    // Rounds
-    h+=`<div style="margin:14px 0 8px;font-size:13px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:5px">修改轮次评分</div>`;
-    MULTI_ROUNDS.forEach((round,i)=>{
-      const k=`m_${round.num}`;
-      h+=`<div class="s"><div class="sh"><div class="sn">${i+1}</div><div class="st">轮${round.num}</div></div>`;
-      h+=`<div class="prompt-box" onclick="copyText(this,'${round.prompt}')">${round.prompt}</div>`;
-      h+=`<div class="sd" style="color:var(--red);font-size:10px">⚠️ 内含矛盾：${round.conflict}</div>`;
-      h+=`<div style="font-size:10px;color:var(--text-light);margin:6px 0 4px">评分：</div>`;
-      h+=MULTI_DIMS.map(dim=>{const sk=`${k}_${dim.key}`;const val=scores[sk];return`<div class="score-row"><span class="score-label">${dim.short}</span><div class="score-btns">${[0,1,2,3].map(v=>`<button class="score-btn s${v} ${val===v?'active':''}" data-k="${sk}" data-v="${v}" onclick="setScore('${sk}',${v})">${v}<span class="tip"><b>${v}</b> ${dim.scores[v]}</span></button>`).join('')}</div></div>`}).join('');
-      // Extra fields
-      h+=`<div class="field-row"><span class="field-label">主观</span><div class="score-btns">${[0,1,2,3].map(v=>{const sk2=`${k}_subj`;const val2=scores[sk2];return`<button class="score-btn s${v} ${val2===v?'active':''}" data-k="${sk2}" data-v="${v}" onclick="setScore('${sk2}',${v})">${v}</button>`}).join('')}</div></div>`;
-      h+=`<div class="field-row"><span class="field-label">耗时</span><div class="timer-widget"><span class="timer-display" id="t-${k}">${formatTime(timers[k]||0)}</span><button class="timer-btn" onclick="startTimer('${k}')">▶</button><button class="timer-btn" onclick="stopTimer('${k}')">⏸</button><button class="timer-btn" onclick="resetTimer('${k}')">↺</button></div></div>`;
-      h+=`<div class="field-row" style="margin-top:4px"><span class="field-label">问题</span><textarea class="field-textarea" placeholder="记录发现的问题..." onchange="setField('${k}_issue',this.value)">${fields[`${k}_issue`]||''}</textarea></div>`;
-      h+=`<div class="field-row"><span class="field-label">备注</span><input class="field-input" placeholder="其他备注..." value="${(fields[`${k}_note`]||'').replace(/"/g,'&quot;')}" onchange="setField('${k}_note',this.value)"></div>`;
-      h+=`</div>`;
+function testerHTML(){
+  if(!cfg.name||!cfg.platforms.length)return'<div class="s"><div class="st">请通过管理员分发的链接进入</div></div>';
+  const myScenes=SCENES.filter(s=>cfg.scenes.includes(s.id));
+  let h='<div class="s"><div class="sh"><div class="sn" style="background:var(--dark)">i</div><div class="st">你的任务</div></div><div class="sd" style="line-height:2"><b>'+cfg.name+'</b> | '+cfg.platforms.join(' / ')+' | '+myScenes.length+'个场景x3轮<br>步骤：先用基础Prompt在每个平台生成游戏 → 按场景发修改 → 每轮打分 → 提交</div></div>';
+  h+='<div class="s"><div class="sh"><div class="sn" style="background:var(--yellow)">?</div><div class="st">评分标准</div></div><table class="dt"><tr><th>维度</th><th style="color:var(--red)">0</th><th style="color:#d97706">1</th><th style="color:var(--blue)">2</th><th style="color:var(--green)">3</th></tr>'+MULTI_DIMS.map(d=>'<tr><td><b>'+d.s+'</b></td>'+d.d.map(x=>'<td style="font-size:10px">'+x+'</td>').join('')+'</tr>').join('')+'</table></div>';
+  h+='<div class="s" style="border-color:var(--abr);background:var(--abg)"><div class="sh"><div class="sn" style="background:var(--dark)">1</div><div class="st">基础Prompt（每个平台先发这个）</div></div><div class="prompt-box" onclick="cp(this,\''+MULTI_BASE+'\')">'+MULTI_BASE+'</div></div>';
+  cfg.platforms.forEach(plat=>{
+    const pk=plat.replace(/[^a-zA-Z0-9]/g,'_');
+    h+='<div class="plat-hd">'+plat+'</div>';
+    myScenes.forEach(scene=>{
+      h+='<div class="sd" style="font-weight:600;margin-top:10px;border-bottom:1px solid var(--border);padding-bottom:3px">'+scene.name+'</div>';
+      scene.rounds.forEach((r,ri)=>{
+        const k=pk+'_'+scene.id+'_r'+(ri+1);
+        h+='<div class="s"><div class="sh"><div class="sn">'+(ri+1)+'</div><div class="st">轮'+(ri+1)+'</div></div>';
+        h+='<div class="prompt-box" onclick="cp(this,`'+r.p.replace(/`/g,"'")+'`)">'+r.p+'</div>';
+        if(r.n)h+='<div class="sd" style="color:var(--red);font-size:10px">* '+r.n+'</div>';
+        h+=MULTI_DIMS.map(dim=>{const sk=k+'_'+dim.k;return'<div class="score-row"><span class="score-label">'+dim.s+'</span><div class="score-btns">'+[0,1,2,3].map(v=>'<button class="score-btn'+(scores[sk]===v?' a'+v:'')+'" data-k="'+sk+'" data-v="'+v+'" onclick="sc(\''+sk+'\','+v+')">'+v+'<span class="tp"><b>'+v+'</b> '+dim.d[v]+'</span></button>').join('')+'</div></div>'}).join('');
+        h+='<div class="field-row"><span class="field-label">主观</span><div class="score-btns">'+[0,1,2,3].map(v=>{const sk2=k+'_sub';return'<button class="score-btn'+(scores[sk2]===v?' a'+v:'')+'" data-k="'+sk2+'" data-v="'+v+'" onclick="sc(\''+sk2+'\','+v+')">'+v+'</button>'}).join('')+'</div><span class="field-label" style="margin-left:6px">耗时</span><div class="timer-w"><span class="timer-d" id="tm_'+k+'">'+fmt(timers[k]||0)+'</span><button class="timer-b" onclick="timerStart(\''+k+'\')">▶</button><button class="timer-b" onclick="timerStop(\''+k+'\')">⏸</button><button class="timer-b" onclick="timerReset(\''+k+'\')">↺</button></div></div>';
+        h+='<div class="field-row"><span class="field-label">备注</span><input class="field-input" placeholder="问题/备注..." value="'+(fields[k+'_n']||'').replace(/"/g,'&quot;')+'" onchange="fields[\''+k+'_n\']=this.value"></div></div>';
+      });
     });
-  } else {
-    // GDD or Direct cases
-    const cases=cfg.cases.map(id=>{const t=id[0],n=+id.slice(1);if(t==='g')return{...GDD_CASES[n-1],type:'gdd'};if(t==='d')return{...DIRECT_CASES[n-1],type:'direct'};return null}).filter(Boolean);
-    cases.forEach((c,i)=>{
-      const k=`${c.type}_${c.num}`;
-      h+=`<div class="s"><div class="sh"><div class="sn">${i+1}</div><div class="st">${c.name}</div></div>`;
-      h+=`<div class="prompt-box" onclick="copyText(this,'${c.prompt}')">${c.prompt}</div>`;
-      h+=DIMS.map(dim=>{const sk=`${k}_${dim.key}`;const val=scores[sk];return`<div class="score-row"><span class="score-label">${dim.short}</span><div class="score-btns">${[0,1,2,3].map(v=>`<button class="score-btn s${v} ${val===v?'active':''}" data-k="${sk}" data-v="${v}" onclick="setScore('${sk}',${v})">${v}<span class="tip"><b>${v}</b> ${dim.scores[v]}</span></button>`).join('')}</div></div>`}).join('');
-      h+=`<div class="field-row"><span class="field-label">耗时</span><div class="timer-widget"><span class="timer-display" id="t-${k}">${formatTime(timers[k]||0)}</span><button class="timer-btn" onclick="startTimer('${k}')">▶</button><button class="timer-btn" onclick="stopTimer('${k}')">⏸</button><button class="timer-btn" onclick="resetTimer('${k}')">↺</button></div><input class="field-input" placeholder="备注..." value="${(fields[`${k}_note`]||'').replace(/"/g,'&quot;')}" onchange="setField('${k}_note',this.value)"></div></div>`;
-    });
-  }
-
-  h+=`<div class="submit-bar"><span style="font-size:11px;color:var(--text-dim)">完成后点击提交</span><button class="submit-btn" id="submitBtn" onclick="doSubmit()">📤 提交结果</button></div>`;
-  return h;
-}
-
-// ===== ADMIN =====
-let assignments=JSON.parse(localStorage.getItem('eval-assignments')||'[]');
-
-function renderAdmin(){
-  let h=`<div class="s"><div class="sh"><div class="sn">⚙</div><div class="st">分发测评任务</div></div>
-  <div class="sd" style="margin-bottom:8px"><b>Token配置（首次）：</b></div>
-  <input type="password" id="tokenInput" placeholder="ghp_xxxxx" value="${localStorage.getItem('gh_token')||''}" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:11px;margin-bottom:12px" onchange="localStorage.setItem('gh_token',this.value);showToast('✓ Token已保存')">
-  <button class="mode-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="addAssignment()">+ 新增测评人</button>
-  </div>`;
-
-  // Assignments
-  assignments.forEach((a,idx)=>{
-    const link=genLink(a);
-    h+=`<div class="admin-card"><div class="remove" onclick="removeAssignment(${idx})">✕</div>
-    <div class="admin-row">
-      <input placeholder="姓名" value="${a.name}" onchange="assignments[${idx}].name=this.value;saveAssignments();render()">
-      <input placeholder="平台(逗号分隔多个)" value="${(a.platforms||[a.platform]||[]).join(',')}" style="width:180px" onchange="assignments[${idx}].platforms=this.value.split(',').map(s=>s.trim()).filter(Boolean);saveAssignments();render()">
-      <select onchange="assignments[${idx}].target=this.value;saveAssignments();render()">
-        <option value="multi" ${a.target==='multi'?'selected':''}>③ 多轮修改</option>
-        <option value="gdd" ${a.target==='gdd'?'selected':''}>① GDD复刻</option>
-        <option value="direct" ${a.target==='direct'?'selected':''}>② 直接需求</option>
-      </select>
-    </div>
-    ${a.target!=='multi'?`<div class="checkbox-group">${(a.target==='gdd'?GDD_CASES:DIRECT_CASES).map(c=>{const id=(a.target==='gdd'?'g':'d')+c.num;const checked=(a.cases||[]).includes(id);return`<label><input type="checkbox" ${checked?'checked':''} onchange="toggleCase(${idx},'${id}')"> ${c.num}.${c.name}</label>`}).join('')}</div>`:'<div class="sd" style="margin:0">自动包含全部3轮矛盾指令</div>'}
-    <div class="link-output"><span style="flex:1;word-break:break-all">${link}</span><button class="copy-btn" onclick="navigator.clipboard.writeText('${link}');showToast('✓ 已复制')">复制链接</button></div>
-    </div>`;
   });
-
-  h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--dark-mid)">📊</div><div class="st">查看汇总</div></div><div class="sd">切换到「📊 汇总」标签查看所有提交</div></div>`;
+  h+='<div class="submit-bar"><span style="font-size:11px;color:var(--dim)">全部平台打完后提交</span><button class="submit-btn" id="subBtn" onclick="doSubmit()">提交结果</button></div>';
   return h;
 }
-
-function addAssignment(){assignments.push({name:'',platforms:[],target:'multi',cases:[]});saveAssignments();render()}
-function removeAssignment(i){assignments.splice(i,1);saveAssignments();render()}
-function toggleCase(idx,id){const a=assignments[idx];if(!a.cases)a.cases=[];const i=a.cases.indexOf(id);if(i>=0)a.cases.splice(i,1);else a.cases.push(id);saveAssignments();render()}
-function saveAssignments(){localStorage.setItem('eval-assignments',JSON.stringify(assignments))}
-function genLink(a){
-  const tk=localStorage.getItem('gh_token')||'';
-  const cases=a.target==='multi'?'m1,m2,m3':(a.cases||[]).join(',');
-  const plats=(a.platforms||[a.platform]||[]).join(',');
-  return`${BASE_URL}?token=${encodeURIComponent(tk)}&name=${encodeURIComponent(a.name)}&platforms=${encodeURIComponent(plats)}&target=${a.target}&cases=${cases}&mode=tester`;
+// ===== ADMIN =====
+let assigns=JSON.parse(localStorage.getItem('ea3')||'[]');
+function adminHTML(){
+  let h='<div class="s"><div class="sh"><div class="sn">T</div><div class="st">Token</div></div><input type="password" value="'+(localStorage.getItem('gh_token')||'')+'" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:11px" onchange="localStorage.setItem(\'gh_token\',this.value);toast(\'ok\')"></div>';
+  h+='<div class="s"><button class="tab active" style="border:none" onclick="addA()">+ 新增测评人</button></div>';
+  assigns.forEach((a,i)=>{
+    const link=mkLink(a);
+    h+='<div class="admin-card"><div class="rm" onclick="rmA('+i+')">x</div>';
+    h+='<div class="admin-row"><input placeholder="姓名" value="'+(a.name||'')+'" onchange="assigns['+i+'].name=this.value;saveA()"><select onchange="assigns['+i+'].target=this.value;saveA();render()"><option value="multi"'+(a.target==='multi'?' selected':'')+'>③多轮修改</option><option value="gdd"'+(a.target==='gdd'?' selected':'')+'>①GDD</option><option value="direct"'+(a.target==='direct'?' selected':'')+'>②直接需求</option></select></div>';
+    h+='<div class="section-label">平台（多选）<span onclick="assigns['+i+'].platforms=[...allPlats()];saveA();render()">全选</span><span class="cl" onclick="assigns['+i+'].platforms=[];saveA();render()">清空</span></div>';
+    h+='<div class="cg">'+allPlats().map(p=>'<label><input type="checkbox" '+((a.platforms||[]).includes(p)?'checked':'')+' onchange="togA('+i+',\'platforms\',\''+p+'\')"> '+p+'</label>').join('')+'</div>';
+    h+='<div style="display:flex;gap:4px;margin-top:3px"><input id="np'+i+'" placeholder="+自定义平台" style="padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:10px;width:110px"><button style="padding:2px 6px;background:var(--abg);border:1px solid var(--abr);border-radius:4px;font-size:9px;cursor:pointer;color:var(--accent)" onclick="addP('+i+')">+</button></div>';
+    if(a.target==='multi'){
+      h+='<div class="section-label">场景（多选）<span onclick="assigns['+i+'].scenes=SCENES.map(s=>s.id);saveA();render()">全选</span><span class="cl" onclick="assigns['+i+'].scenes=[];saveA();render()">清空</span></div>';
+      h+='<div class="cg">'+SCENES.map(s=>'<label><input type="checkbox" '+((a.scenes||[]).includes(s.id)?'checked':'')+' onchange="togA('+i+',\'scenes\',\''+s.id+'\')"> '+s.name+'</label>').join('')+'</div>';
+    }
+    h+='<div class="link-out"><span style="flex:1">'+(link||'填姓名+选平台')+'</span>'+(link?'<button class="cp" onclick="navigator.clipboard.writeText(\''+link+'\');toast(\'已复制\')">复制</button>':'')+'</div></div>';
+  });
+  return h;
 }
-
+function addA(){assigns.push({name:'',platforms:[],scenes:SCENES.map(s=>s.id),target:'multi',cases:[]});saveA();render()}
+function rmA(i){assigns.splice(i,1);saveA();render()}
+function togA(i,f,v){const a=assigns[i];if(!a[f])a[f]=[];const x=a[f].indexOf(v);if(x>=0)a[f].splice(x,1);else a[f].push(v);saveA();render()}
+function addP(i){const el=document.getElementById('np'+i);const n=el.value.trim();if(!n)return;if(!custPlats.includes(n)){custPlats.push(n);localStorage.setItem('ep',JSON.stringify(custPlats))}if(!assigns[i].platforms.includes(n))assigns[i].platforms.push(n);saveA();render()}
+function saveA(){localStorage.setItem('ea3',JSON.stringify(assigns))}
+function mkLink(a){if(!a.name||!(a.platforms||[]).length)return'';const tk=localStorage.getItem('gh_token')||'';return BASE+'?token='+encodeURIComponent(tk)+'&name='+encodeURIComponent(a.name)+'&platforms='+encodeURIComponent(a.platforms.join(','))+'&target='+a.target+'&scenes='+encodeURIComponent((a.scenes||[]).join(','))+'&mode=tester'}
 // ===== SUBMIT =====
 async function doSubmit(){
-  const btn=document.getElementById('submitBtn');
-  btn.textContent='⏳ 提交中...';btn.disabled=true;
-  const result={name:cfg.name,platforms:cfg.platforms,target:cfg.target,time:new Date().toISOString(),rounds:[]};
-  
-  if(cfg.target==='multi'){
-    MULTI_ROUNDS.forEach(round=>{
-      const k=`m_${round.num}`;
-      const item={num:round.num,prompt:round.prompt,scores:{},subjective:scores[`${k}_subj`],time:timers[k]||0,issue:fields[`${k}_issue`]||'',note:fields[`${k}_note`]||''};
-      MULTI_DIMS.forEach(d=>{item.scores[d.key]=scores[`${k}_${d.key}`]});
-      const valid=Object.values(item.scores).filter(v=>v!==undefined);
-      item.avg=valid.length?(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2):'';
-      result.rounds.push(item);
+  const btn=document.getElementById('subBtn');btn.textContent='...';btn.disabled=true;
+  const result={name:cfg.name,platforms:cfg.platforms,target:cfg.target,time:new Date().toISOString(),data:[]};
+  const myScenes=SCENES.filter(s=>cfg.scenes.includes(s.id));
+  cfg.platforms.forEach(plat=>{
+    const pk=plat.replace(/[^a-zA-Z0-9]/g,'_');
+    const pd={platform:plat,scenes:[]};
+    myScenes.forEach(scene=>{
+      const sd={scene:scene.name,rounds:[]};
+      scene.rounds.forEach((r,ri)=>{
+        const k=pk+'_'+scene.id+'_r'+(ri+1);
+        const item={round:ri+1,scores:{},sub:scores[k+'_sub'],time:timers[k]||0,note:fields[k+'_n']||''};
+        MULTI_DIMS.forEach(d=>{item.scores[d.k]=scores[k+'_'+d.k]});
+        const v=Object.values(item.scores).filter(x=>x!==undefined);
+        item.avg=v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2):'';
+        sd.rounds.push(item);
+      });
+      pd.scenes.push(sd);
     });
-  } else {
-    const cases=cfg.cases.map(id=>{const t=id[0],n=+id.slice(1);if(t==='g')return{...GDD_CASES[n-1],type:'gdd'};if(t==='d')return{...DIRECT_CASES[n-1],type:'direct'};return null}).filter(Boolean);
-    cases.forEach(c=>{
-      const k=`${c.type}_${c.num}`;
-      const item={type:c.type,num:c.num,name:c.name,scores:{},time:timers[k]||0,note:fields[`${k}_note`]||''};
-      DIMS.forEach(d=>{item.scores[d.key]=scores[`${k}_${d.key}`]});
-      const valid=Object.values(item.scores).filter(v=>v!==undefined);
-      item.avg=valid.length?(valid.reduce((a,b)=>a+b,0)/valid.length).toFixed(2):'';
-      result.rounds.push(item);
-    });
-  }
-  
-  const path=`data/${cfg.name}_${cfg.platform.replace(/[+\/]/g,'_')}.json`;
+    result.data.push(pd);
+  });
+  const path='data/'+cfg.name+'_'+Date.now()+'.json';
   const ok=await ghPut(path,JSON.stringify(result,null,2));
-  if(ok){btn.textContent='✅ 提交成功！';btn.classList.add('success');showToast('✅ 已提交，感谢！')}
-  else{btn.textContent='❌ 失败，重试';btn.disabled=false;showToast('提交失败，请重试')}
+  btn.textContent=ok?'提交成功':'失败';if(ok)toast('已提交');else btn.disabled=false;
 }
-
 // ===== SUMMARY =====
-async function loadSummary(){
-  const files=await ghList('data');
-  const allData=[];
-  for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet(`data/${f.name}`);if(d)allData.push(d)}
-  if(!allData.length){document.getElementById('content').innerHTML='<div class="s"><div class="st">📭 暂无提交</div></div>';return}
-  let h=`<div class="s"><div class="sh"><div class="sn" style="background:var(--green)">✓</div><div class="st">已收到 ${allData.length} 份</div></div>
-  <table class="data"><tr><th>测评人</th><th>平台</th><th>目标</th><th>均分</th><th>时间</th></tr>
-  ${allData.map(d=>{const avgs=d.rounds.map(r=>parseFloat(r.avg)).filter(v=>!isNaN(v));const avg=avgs.length?(avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(2):'-';return`<tr><td><b>${d.name}</b></td><td>${d.platform}</td><td>${d.target}</td><td style="color:var(--accent);font-weight:700">${avg}</td><td style="font-size:10px">${new Date(d.time).toLocaleString('zh-CN')}</td></tr>`}).join('')}
-  </table></div>`;
-  // Platform comparison for multi
-  const multiData=allData.filter(d=>d.target==='multi');
-  if(multiData.length>1){
-    h+=`<div class="s"><div class="sh"><div class="sn" style="background:var(--blue)">VS</div><div class="st">多轮修改 平台对比</div></div>
-    <table class="data"><tr><th>平台</th><th>意图</th><th>精准</th><th>完成</th><th>质量</th><th>综合</th></tr>
-    ${[...new Set(multiData.map(d=>d.platform))].map(p=>{const pData=multiData.filter(d=>d.platform===p);const dimAvgs=MULTI_DIMS.map(dim=>{const all=pData.flatMap(d=>d.rounds.map(r=>r.scores[dim.key]).filter(v=>v!==undefined));return all.length?(all.reduce((a,b)=>a+b,0)/all.length).toFixed(1):'-'});const totalAvg=pData.flatMap(d=>d.rounds.map(r=>parseFloat(r.avg)).filter(v=>!isNaN(v)));const avg=totalAvg.length?(totalAvg.reduce((a,b)=>a+b,0)/totalAvg.length).toFixed(2):'-';return`<tr><td><b>${p}</b></td>${dimAvgs.map(v=>`<td>${v}</td>`).join('')}<td style="color:var(--accent);font-weight:700">${avg}</td></tr>`}).join('')}
-    </table></div>`;
-  }
-  h+=`<div class="s"><button class="mode-btn" style="background:var(--accent);color:#fff;border-color:var(--accent)" onclick="exportAll()">📊 导出Excel</button></div>`;
-  document.getElementById('content').innerHTML=h;
-  window._allData=allData;
+async function loadSum(){
+  const files=await ghList('data');const all=[];
+  for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet('data/'+f.name);if(d)all.push(d)}
+  if(!all.length){document.getElementById('app').innerHTML='<div class="s sd">暂无提交</div>';return}
+  let h='<div class="s"><div class="st">'+all.length+' 份提交</div><table class="dt"><tr><th>人</th><th>平台</th><th>时间</th></tr>'+all.map(d=>'<tr><td><b>'+d.name+'</b></td><td>'+(d.platforms||[]).join(', ')+'</td><td style="font-size:10px">'+new Date(d.time).toLocaleString('zh-CN')+'</td></tr>').join('')+'</table></div>';
+  h+='<div class="s"><button class="tab active" style="border:none" onclick="expAll()">导出Excel</button></div>';
+  document.getElementById('app').innerHTML=h;window._d=all;
 }
-
-function exportAll(){
-  const allData=window._allData||[];const wb=XLSX.utils.book_new();
-  const rows=[];allData.forEach(d=>{d.rounds.forEach(r=>{const row={'测评人':d.name,'平台':d.platform,'目标':d.target,'编号':r.num,'名称':r.name||`轮${r.num}`};Object.entries(r.scores).forEach(([k,v])=>row[k]=v);row['主观']=r.subjective;row['均分']=r.avg;row['耗时']=r.time;row['问题']=r.issue||'';row['备注']=r.note||'';rows.push(row)})});
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'全部数据');
-  XLSX.writeFile(wb,`测评汇总_${new Date().toISOString().slice(0,10)}.xlsx`);showToast('📊 已导出')
+function expAll(){
+  const all=window._d||[];const wb=XLSX.utils.book_new();const rows=[];
+  all.forEach(d=>{(d.data||[]).forEach(pd=>{(pd.scenes||[]).forEach(sd=>{(sd.rounds||[]).forEach(r=>{const row={人:d.name,平台:pd.platform,场景:sd.scene,轮:r.round};Object.entries(r.scores||{}).forEach(([k,v])=>row[k]=v);row['主观']=r.sub;row['均分']=r.avg;row['耗时']=r.time;row['备注']=r.note;rows.push(row)})})})});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'data');
+  XLSX.writeFile(wb,'eval_'+new Date().toISOString().slice(0,10)+'.xlsx');toast('已导出')
 }
-
-// ===== INIT =====
-if(P.get('token')){localStorage.setItem('gh_token',P.get('token'));const url=new URL(location);url.searchParams.delete('token');history.replaceState(null,'',url)}
+if(cfg.name&&cfg.platforms.length)mode='tester';
 render();
 </script>
 </body>
