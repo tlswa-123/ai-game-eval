@@ -275,37 +275,95 @@ async function loadSum(){
   const files=await ghList('data');const all=[];
   for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet('data/'+f.name);if(d)all.push(d)}
   if(!all.length){document.getElementById('app').innerHTML='<div class="s sd">暂无数据</div>';return}
-  const platData={};
-  all.forEach(d=>{(d.data||[]).forEach(pd=>{
-    if(!platData[pd.platform])platData[pd.platform]={scores:[],dims:{}};
-    const dims=d.target==='multi'?DIMS_3:DIMS_12;
-    dims.forEach(dim=>{if(!platData[pd.platform].dims[dim.k])platData[pd.platform].dims[dim.k]=[]});
-    (pd.items||[]).forEach(item=>{
-      const v=Object.values(item.scores||{}).filter(x=>x!==undefined);
-      if(v.length)platData[pd.platform].scores.push(v.reduce((a,b)=>a+b,0)/v.length);
-      dims.forEach(dim=>{if(item.scores&&item.scores[dim.k]!==undefined)platData[pd.platform].dims[dim.k].push(item.scores[dim.k])});
-    });
-  })});
-  const platforms=Object.keys(platData);
-  const avg=arr=>arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):'-';
-  let h='<div class="s"><div class="sh"><div class="sn" style="background:var(--green)">'+all.length+'</div><div class="st">'+all.length+' 份提交</div><button class="refresh-btn" onclick="loadSum()" style="margin-left:auto">刷新</button></div>';
-  h+='<table class="dt"><tr><th>人</th><th>平台</th><th>目标</th><th>均分</th><th>时间</th></tr>';
-  all.forEach(d=>{(d.data||[]).forEach(pd=>{
-    const avgs=(pd.items||[]).map(i=>parseFloat(i.avg)).filter(v=>!isNaN(v));
-    h+='<tr><td><b>'+d.name+'</b></td><td>'+pd.platform+'</td><td>'+(d.target||'')+'</td><td style="color:var(--accent);font-weight:700">'+avg(avgs)+'</td><td style="font-size:8px">'+new Date(d.time).toLocaleString('zh-CN')+'</td></tr>';
-  })});
-  h+='</table></div>';
-  if(platforms.length){
-    h+='<div class="s"><div class="st" style="font-size:11px;margin-bottom:6px">平台对比</div><table class="dt"><tr><th>平台</th><th>综合</th><th>数据量</th></tr>';
-    const sorted=platforms.map(p=>({p,s:platData[p].scores.length?platData[p].scores.reduce((a,b)=>a+b,0)/platData[p].scores.length:0,n:platData[p].scores.length})).sort((a,b)=>b.s-a.s);
-    sorted.forEach(x=>{h+='<tr><td><b>'+x.p+'</b></td><td style="color:var(--accent);font-weight:700">'+x.s.toFixed(2)+'</td><td>'+x.n+'项</td></tr>'});
-    h+='</table>';
-    h+='<div style="margin-top:8px">';
-    sorted.forEach(x=>{const pct=Math.round(x.s/3*100);h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:9px"><span style="width:90px;font-weight:600">'+x.p+'</span><div style="flex:1;height:14px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--accent),#f97316);border-radius:3px"></div></div><span style="font-weight:700;color:var(--accent);width:28px">'+x.s.toFixed(2)+'</span></div>'});
-    h+='</div></div>';
-  }
+  // Separate by target
+  const byTarget={multi:[],gdd:[],direct:[]};
+  all.forEach(d=>{if(byTarget[d.target])byTarget[d.target].push(d);else byTarget.multi.push(d)});
+  let h='<div class="s"><div class="sh"><div class="sn" style="background:var(--green)">'+all.length+'</div><div class="st">'+all.length+' 份提交</div><button class="refresh-btn" onclick="loadSum()" style="margin-left:auto">刷新</button></div></div>';
+  // For each target that has data, render analysis
+  if(byTarget.multi.length) h+=renderTargetAnalysis('③ 多轮修改',byTarget.multi,DIMS_3);
+  if(byTarget.gdd.length) h+=renderTargetAnalysis('① GDD复刻',byTarget.gdd,DIMS_12);
+  if(byTarget.direct.length) h+=renderTargetAnalysis('② 直接需求',byTarget.direct,DIMS_12);
   h+='<div class="s"><button class="tab active" style="border:none" onclick="expAll()">导出Excel</button></div>';
   document.getElementById('app').innerHTML=h;window._d=all;
+}
+function renderTargetAnalysis(title,data,dims){
+  // Collect per-platform stats
+  const platStats={};
+  data.forEach(d=>{(d.data||[]).forEach(pd=>{
+    if(!platStats[pd.platform])platStats[pd.platform]={dimSums:{},dimCounts:{},totalScores:[],totalTime:0,subjScores:[]};
+    const ps=platStats[pd.platform];
+    dims.forEach(dim=>{if(!ps.dimSums[dim.k]){ps.dimSums[dim.k]=0;ps.dimCounts[dim.k]=0}});
+    (pd.items||[]).forEach(item=>{
+      let itemTotal=0,itemCount=0;
+      dims.forEach(dim=>{
+        const v=(item.scores||{})[dim.k];
+        if(v!==undefined&&v!==null){ps.dimSums[dim.k]+=v;ps.dimCounts[dim.k]++;itemTotal+=v;itemCount++}
+      });
+      if(itemCount)ps.totalScores.push(itemTotal/itemCount);
+      ps.totalTime+=(item.time||0);
+      if(item.scores&&item.scores.subjective!==undefined)ps.subjScores.push(item.scores.subjective);
+    });
+  })});
+  const platforms=Object.keys(platStats);
+  if(!platforms.length)return'';
+  const avg=arr=>arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):'-';
+  const avgN=arr=>arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;
+  // Platform comparison table
+  let h='<div class="s"><div class="sh"><div class="sn" style="background:var(--blue)">'+title[0]+'</div><div class="st">'+title+'</div></div>';
+  // Main comparison table
+  h+='<table class="dt"><tr><th>平台</th>';
+  dims.forEach(d=>{h+='<th>'+d.name+'</th>'});
+  h+='<th style="color:var(--accent)">客观总分</th><th>耗时(秒)</th></tr>';
+  // Calculate all values first for min/max highlighting
+  const dimAvgs={};
+  dims.forEach(dim=>{dimAvgs[dim.k]=platforms.map(p=>{const ps=platStats[p];return ps.dimCounts[dim.k]?ps.dimSums[dim.k]/ps.dimCounts[dim.k]:0})});
+  const totalAvgs=platforms.map(p=>avgN(platStats[p].totalScores));
+  const totalTimes=platforms.map(p=>platStats[p].totalTime);
+  platforms.forEach((p,pi)=>{
+    const ps=platStats[p];
+    h+='<tr><td><b>'+p+'</b></td>';
+    dims.forEach(dim=>{
+      const val=ps.dimCounts[dim.k]?(ps.dimSums[dim.k]/ps.dimCounts[dim.k]).toFixed(2):'-';
+      const vals=dimAvgs[dim.k];
+      const isMax=vals[pi]===Math.max(...vals)&&vals[pi]>0;
+      const isMin=vals[pi]===Math.min(...vals)&&platforms.length>1;
+      const style=isMax?'color:var(--green);font-weight:700':isMin?'color:var(--red)':'';
+      h+='<td style="'+style+'">'+val+'</td>';
+    });
+    const totalVal=ps.totalScores.length?avgN(ps.totalScores).toFixed(2):'-';
+    const isMaxT=totalAvgs[pi]===Math.max(...totalAvgs)&&totalAvgs[pi]>0;
+    const isMinT=totalAvgs[pi]===Math.min(...totalAvgs)&&platforms.length>1;
+    h+='<td style="'+(isMaxT?'color:var(--green);font-weight:700':isMinT?'color:var(--red);font-weight:700':'color:var(--accent);font-weight:700')+'">'+totalVal+'</td>';
+    const timeVal=ps.totalTime||0;
+    const isMaxTime=totalTimes[pi]===Math.max(...totalTimes)&&platforms.length>1;
+    const isMinTime=totalTimes[pi]===Math.min(...totalTimes)&&totalTimes[pi]>0;
+    h+='<td style="'+(isMinTime?'color:var(--green)':isMaxTime?'color:var(--red)':'')+'">'+timeVal+'</td>';
+    h+='</tr>';
+  });
+  h+='</table>';
+  // Bar chart - overall score
+  const sorted=platforms.map((p,i)=>({p,s:totalAvgs[i]})).sort((a,b)=>b.s-a.s);
+  h+='<div style="margin-top:10px">';
+  sorted.forEach((x,i)=>{
+    const pct=Math.round(x.s/3*100);
+    const color=i===0?'var(--green)':i===sorted.length-1&&sorted.length>1?'var(--red)':'var(--accent)';
+    h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:9px"><span style="width:90px;font-weight:600;text-align:right">'+x.p+'</span><div style="flex:1;height:14px;background:var(--bg);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:3px;transition:width .3s"></div></div><span style="font-weight:700;color:'+color+';width:30px">'+x.s.toFixed(2)+'</span></div>';
+  });
+  h+='</div>';
+  // Dimension radar-like comparison (simple horizontal bars per dim)
+  h+='<div style="margin-top:10px;font-size:9px;font-weight:600;color:var(--dim);margin-bottom:4px">各维度对比</div>';
+  dims.forEach(dim=>{
+    h+='<div style="margin-bottom:6px"><div style="font-size:8px;color:var(--dim);margin-bottom:2px">'+dim.name+'</div>';
+    platforms.forEach(p=>{
+      const ps=platStats[p];
+      const val=ps.dimCounts[dim.k]?ps.dimSums[dim.k]/ps.dimCounts[dim.k]:0;
+      const pct=Math.round(val/3*100);
+      h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:1px"><span style="width:70px;font-size:8px;text-align:right;color:var(--dim)">'+p+'</span><div style="flex:1;height:8px;background:var(--bg);border-radius:2px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:var(--accent);border-radius:2px"></div></div><span style="font-size:8px;width:24px;color:var(--accent)">'+val.toFixed(1)+'</span></div>';
+    });
+    h+='</div>';
+  });
+  h+='</div>';
+  return h;
 }
 function expAll(){
   const all=window._d||[];const wb=XLSX.utils.book_new();const rows=[];
