@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI游戏测评 v6.2</title>
+<title>AI游戏测评</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -137,7 +137,7 @@ function render(){
   const isTester=mode==='tester'&&cfg.name&&cfg.platforms.length;
   document.getElementById('tabs').innerHTML=isTester?'':`<button class="tab ${mode==='admin'?'active':''}" onclick="go('admin')">管理/分发</button><button class="tab ${mode==='summary'?'active':''}" onclick="go('summary')">汇总</button>`;
   document.getElementById('sub').textContent=isTester?cfg.name+' | '+cfg.platforms.join(', '):'';
-  if(mode==='admin'){try{document.getElementById('app').innerHTML=adminH()}catch(e){document.getElementById('app').innerHTML='<pre style="color:red">'+e.message+'\n'+e.stack+'</pre>';console.error(e)};document.getElementById('side').innerHTML=''}
+  if(mode==='admin'){document.getElementById('app').innerHTML=adminH();document.getElementById('side').innerHTML=''}
   else if(mode==='summary'){document.getElementById('app').innerHTML='<div class="s sd" style="text-align:center;padding:20px">加载中...</div>';document.getElementById('side').innerHTML='';loadSum()}
   else{document.getElementById('app').innerHTML=testerH();renderSide()}
 }
@@ -213,7 +213,7 @@ function scoreGrid(itemKey,dims,shorts){
     // Note
     h+='<div class="extras"><input placeholder="备注" value="'+(fields[base+'_n']||'').replace(/"/g,'&quot;')+'" onchange="fields[\''+base+'_n\']=this.value"></div>';
     // Image upload (max 4)
-    h+='<div class="extras" style="flex-direction:column;align-items:stretch;gap:3px;margin-top:4px"><div style="font-size:11px;color:var(--light)">产物截图（最多4张）</div><div id="imgs_'+base+'" style="display:flex;gap:3px;flex-wrap:wrap">';
+    h+='<div class="extras" style="flex-direction:column;align-items:stretch;gap:3px;margin-top:4px" ondrop="dropImg(event,\''+base+'\')" ondragover="event.preventDefault()" onpaste="pasteImg(event,\''+base+'\')" tabindex="0"><div style="font-size:11px;color:var(--light)">截图（拖拽/粘贴/点击，最多4张）（最多4张）</div><div id="imgs_'+base+'" style="display:flex;gap:3px;flex-wrap:wrap">';
     const imgs=fields[base+'_imgs']||[];
     imgs.forEach((src,ii)=>{h+='<div style="position:relative;width:60px;height:60px;border-radius:4px;overflow:hidden;border:1px solid var(--border)"><img src="'+src+'" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;top:1px;right:1px;width:14px;height:14px;background:var(--red);color:#fff;border-radius:50%;font-size:8px;display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="rmImg(\''+base+'\','+ii+')">x</div></div>'});
     if(imgs.length<4){h+='<label style="width:60px;height:60px;border:1px dashed var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--light)"><input type="file" accept="image/*" style="display:none" onchange="addImg(\''+base+'\',this)">+</label>';}
@@ -225,7 +225,7 @@ function scoreGrid(itemKey,dims,shorts){
 }
 
 let assigns=JSON.parse(localStorage.getItem('ea5')||localStorage.getItem('ea4')||'[]');
-function adminH(){console.log("adminH called, assigns:",assigns.length);
+function adminH(){
   let h='<div class="s"><div class="sd"><b>Token:</b></div><input type="password" value="'+(localStorage.getItem('gh_token')||'')+'" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:4px;font-size:10px" onchange="localStorage.setItem(\'gh_token\',this.value);toast(\'ok\')"></div>';
   h+='<div class="s"><button class="tab active" style="border:none" onclick="addA()">+ 新增测评人</button></div>';
   assigns.forEach((a,i)=>{
@@ -393,21 +393,11 @@ function expAll(){
 }
 if(cfg.name&&cfg.platforms.length)mode='tester';
 render();
-function addImg(base,input){
-  const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    if(!fields[base+'_imgs'])fields[base+'_imgs']=[];
-    if(fields[base+'_imgs'].length>=4)return;
-    fields[base+'_imgs'].push(e.target.result);
-    render();
-  };
-  reader.readAsDataURL(file);
-}
-function rmImg(base,idx){
-  if(fields[base+'_imgs'])fields[base+'_imgs'].splice(idx,1);
-  render();
-}
+function addImg(base,input){const file=input.files[0];if(file)readImg(base,file)}
+function readImg(base,file){if(!file||!file.type.startsWith('image'))return;const reader=new FileReader();reader.onload=e=>{if(!fields[base+'_imgs'])fields[base+'_imgs']=[];if(fields[base+'_imgs'].length>=4){toast('max 4');return}fields[base+'_imgs'].push(e.target.result);render()};reader.readAsDataURL(file)}
+function dropImg(e,base){e.preventDefault();e.stopPropagation();const file=e.dataTransfer.files[0];if(file)readImg(base,file)}
+function pasteImg(e,base){const items=e.clipboardData&&e.clipboardData.items;if(!items)return;for(let i=0;i<items.length;i++){if(items[i].type.startsWith('image')){e.preventDefault();readImg(base,items[i].getAsFile());return}}}
+function rmImg(base,idx){if(fields[base+'_imgs'])fields[base+'_imgs'].splice(idx,1);render()}
 render();
 </script>
 </body>
