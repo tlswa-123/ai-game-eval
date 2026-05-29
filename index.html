@@ -93,6 +93,10 @@ table.dt th{background:var(--bg);font-size:11px;font-weight:600;color:var(--dim)
 .img-del{position:absolute;top:2px;right:2px;width:16px;height:16px;background:var(--red);color:#fff;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .img-add{width:64px;height:64px;border:2px dashed var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--light);transition:border-color .2s}
 .img-add:hover{border-color:var(--accent);color:var(--accent)}
+
+.lightbox{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out}
+.lightbox.show{display:flex}
+.lightbox img{max-width:90%;max-height:90%;border-radius:8px;box-shadow:0 4px 30px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -230,7 +234,7 @@ function scoreGrid(itemKey,dims,shorts){
     // Note
     h+='<div class="extras"><input placeholder="备注" value="'+(fields[base+'_n']||'').replace(/"/g,'&quot;')+'" onchange="fields[\''+base+'_n\']=this.value"></div>';
     // Image upload (max 4) - supports click/drag/paste
-    h+='<div class="img-zone" data-imgbase="'+base+'" tabindex="0" ondrop="dropImg(event,\''+base+'\')" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')" onpaste="pasteImg(event,\''+base+'\')">';
+    h+='<div class="img-zone" data-imgbase="'+base+'" tabindex="0" ondrop="dropImg(event,\''+base+'\')" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')"">';
     h+='<div class="img-zone-label">截图（最多4张）：点击+上传 / 拖入 / <b>点击此区域后 Ctrl+V 粘贴</b></div>';
     h+='<div class="img-list">';
     const imgs=fields[base+'_imgs']||[];
@@ -472,7 +476,11 @@ function rmImg(base,idx){if(fields[base+'_imgs'])fields[base+'_imgs'].splice(idx
 document.addEventListener("paste",function(e){var zone=document.activeElement;if(!zone||!zone.dataset||!zone.dataset.imgbase)zone=document.activeElement.closest&&document.activeElement.closest("[data-imgbase]");if(zone&&zone.dataset.imgbase){var items=e.clipboardData&&e.clipboardData.items;if(!items)return;for(var i=0;i<items.length;i++){if(items[i].type.indexOf("image")===0){e.preventDefault();readImg(zone.dataset.imgbase,items[i].getAsFile());return}}}});
 document.addEventListener("drop",function(e){var el=e.target.closest("[data-imgbase]");if(el){e.preventDefault();readImg(el.dataset.imgbase,e.dataTransfer.files[0])}});
 document.addEventListener("dragover",function(e){if(e.target.closest("[data-imgbase]"))e.preventDefault()});
+document.addEventListener('click',function(e){if(e.target.tagName==='IMG'&&e.target.closest('.img-thumb')){viewImg(e.target.src)}});
+function viewImg(src){document.getElementById("lbImg").src=src;document.getElementById("lightbox").classList.add("show")}
 render();
 </script>
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('show')"><img id="lbImg"></div>
 </body>
 </html>
