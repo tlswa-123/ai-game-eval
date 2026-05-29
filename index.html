@@ -557,10 +557,19 @@ function expHtmlReport(all){
 if(cfg.name&&cfg.platforms.length)mode='tester';
 render();
 function addImg(base,input){const file=input.files[0];if(file)readImg(base,file)}
-function readImg(base,file){if(!file||!file.type.startsWith('image'))return;const reader=new FileReader();reader.onload=e=>{if(!fields[base+'_imgs'])fields[base+'_imgs']=[];if(fields[base+'_imgs'].length>=4){toast('max 4');return}fields[base+'_imgs'].push(e.target.result);render()};reader.readAsDataURL(file)}
+function readImg(base,file){if(!file||!file.type.startsWith('image'))return;const reader=new FileReader();reader.onload=e=>{if(!fields[base+'_imgs'])fields[base+'_imgs']=[];if(fields[base+'_imgs'].length>=4){toast('max 4');return}fields[base+'_imgs'].push(e.target.result);updateImgZone(base)};reader.readAsDataURL(file)}
+function updateImgZone(base){
+  const zone=document.querySelector('[data-imgbase="'+base+'"] .img-list');
+  if(!zone)return render();
+  const imgs=fields[base+'_imgs']||[];
+  let h='';
+  imgs.forEach((src,ii)=>{h+='<div class="img-thumb"><img src="'+src+'"><div class="img-del" onclick="event.stopPropagation();rmImg(\''+base+'\','+ii+')">x</div></div>'});
+  if(imgs.length<4){h+='<label class="img-add"><input type="file" accept="image/*" style="display:none" onchange="addImg(\''+base+'\',this)">+</label>';}
+  zone.innerHTML=h;
+}
 function dropImg(e,base){e.preventDefault();e.stopPropagation();const file=e.dataTransfer.files[0];if(file)readImg(base,file)}
 function pasteImg(e,base){const items=e.clipboardData&&e.clipboardData.items;if(!items)return;for(let i=0;i<items.length;i++){if(items[i].type.startsWith('image')){e.preventDefault();readImg(base,items[i].getAsFile());return}}}
-function rmImg(base,idx){if(fields[base+'_imgs'])fields[base+'_imgs'].splice(idx,1);render()}
+function rmImg(base,idx){if(fields[base+'_imgs'])fields[base+'_imgs'].splice(idx,1);updateImgZone(base)}
 document.addEventListener("paste",function(e){var zone=document.activeElement;if(!zone||!zone.dataset||!zone.dataset.imgbase)zone=document.activeElement.closest&&document.activeElement.closest("[data-imgbase]");if(zone&&zone.dataset.imgbase){var items=e.clipboardData&&e.clipboardData.items;if(!items)return;for(var i=0;i<items.length;i++){if(items[i].type.indexOf("image")===0){e.preventDefault();readImg(zone.dataset.imgbase,items[i].getAsFile());return}}}});
 document.addEventListener("drop",function(e){var el=e.target.closest("[data-imgbase]");if(el){e.preventDefault();readImg(el.dataset.imgbase,e.dataTransfer.files[0])}});
 document.addEventListener("dragover",function(e){if(e.target.closest("[data-imgbase]"))e.preventDefault()});
