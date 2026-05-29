@@ -322,9 +322,10 @@ async function loadSum(){
   if(byTarget.multi.length) h+=renderTargetAnalysis('③ 多轮修改',byTarget.multi,DIMS_3);
   if(byTarget.gdd.length) h+=renderTargetAnalysis('① GDD复刻',byTarget.gdd,DIMS_12);
   if(byTarget.direct.length) h+=renderTargetAnalysis('② 直接需求',byTarget.direct,DIMS_12);
+  
+  h+='<div id="submitList"></div>';
   h+='<div class="s"><button class="tab active" style="border:none" onclick="expAll()">导出Excel</button></div>';
   document.getElementById('app').innerHTML=h;window._d=all;
-}h+='<div id="submitList"></div></div>';
   // Render expandable list
   setTimeout(()=>{
     let sl='';
@@ -333,37 +334,24 @@ async function loadSum(){
       sl+='<div style="border:1px solid var(--border);border-radius:6px;margin-bottom:6px;overflow:hidden">';
       sl+='<div style="display:flex;align-items:center;padding:8px 12px;cursor:pointer;background:var(--bg)" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'">';
       sl+='<b style="flex:1">'+d.name+'</b>';
-      sl+='<span style="color:var(--dim);font-size:11px;margin-right:8px">'+(d.platforms||[]).join(', ')+'</span>';
+      sl+='<span style="color:var(--dim);font-size:11px;margin-right:8px">'+(d.platforms||[d.platform||'']).join(', ')+'</span>';
       sl+='<span style="font-size:10px;color:var(--light)">'+new Date(d.time).toLocaleString('zh-CN')+'</span>';
       sl+='</div>';
-      sl+='<div style="display:none;padding:8px 12px;border-top:1px solid var(--border);font-size:11px">';
+      sl+='<div style="display:none;padding:8px 12px;border-top:1px solid var(--border);font-size:12px">';
       (d.data||[]).forEach(pd=>{
         sl+='<div style="margin-bottom:4px"><b>'+pd.platform+'</b>: ';
         const avgs=(pd.items||[]).map(i=>parseFloat(i.avg)).filter(v=>!isNaN(v));
         const avg=avgs.length?(avgs.reduce((a,b)=>a+b,0)/avgs.length).toFixed(2):'-';
-        sl+='均分 <span style="color:var(--accent);font-weight:700">'+avg+'</span> ('+avgs.length+'项)</div>';
+        sl+='均分 <span style="color:var(--accent);font-weight:700">'+avg+'</span></div>';
       });
       sl+='<div style="display:flex;gap:8px;margin-top:6px">';
-      sl+='<button style="padding:3px 10px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:10px;cursor:pointer" onclick="viewSubmit('+di+')">查看详情</button>';
-      sl+='<button style="padding:3px 10px;background:var(--rbg);color:var(--red);border:1px solid var(--red);border-radius:4px;font-size:10px;cursor:pointer" onclick="delSubmit(\''+fileName+'\','+di+')">删除</button>';
+      sl+='<button style="padding:4px 12px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer" onclick="viewSubmit('+di+')">查看详情</button>';
+      sl+='<button style="padding:4px 12px;background:var(--bg);color:var(--red);border:1px solid var(--red);border-radius:4px;font-size:11px;cursor:pointer" onclick="delSubmit(\''+fileName+'\','+di+')">删除</button>';
       sl+='</div></div></div>';
     });
-    document.getElementById('submitList').innerHTML=sl;
+    const el=document.getElementById('submitList');
+    if(el)el.innerHTML=sl;
   },0);
-async function loadSum(){
-  const files=await ghList('data');const all=[];
-  const fnames=[];for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet('data/'+f.name);if(d){all.push(d);fnames.push(f.name)}}window._files=fnames
-  if(!all.length){document.getElementById('app').innerHTML='<div class="s sd">暂无数据</div>';return}
-  // Separate by target
-  const byTarget={multi:[],gdd:[],direct:[]};
-  all.forEach(d=>{if(byTarget[d.target])byTarget[d.target].push(d);else byTarget.multi.push(d)});
-  let h='<div class="s"><div class="sh"><div class="sn" style="background:var(--green)">'+all.length+'</div><div class="st">'+all.length+' 份提交</div><button class="refresh-btn" onclick="loadSum()" style="margin-left:auto">刷新</button></div></div>';
-  // For each target that has data, render analysis
-  if(byTarget.multi.length) h+=renderTargetAnalysis('③ 多轮修改',byTarget.multi,DIMS_3);
-  if(byTarget.gdd.length) h+=renderTargetAnalysis('① GDD复刻',byTarget.gdd,DIMS_12);
-  if(byTarget.direct.length) h+=renderTargetAnalysis('② 直接需求',byTarget.direct,DIMS_12);
-  h+='<div class="s"><button class="tab active" style="border:none" onclick="expAll()">导出Excel</button></div>';
-  document.getElementById('app').innerHTML=h;window._d=all;
 }
 function renderTargetAnalysis(title,data,dims){
   // Collect per-platform stats
