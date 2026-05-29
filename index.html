@@ -349,7 +349,7 @@ async function doSubmit(){
       SCENES.filter(s=>cfg.scenes.includes(s.id)).forEach(scene=>{
         scene.rounds.forEach((r,ri)=>{
           const base=pk+'_'+scene.id+'_r'+(ri+1);
-          const item={scene:scene.name,round:ri+1,scores:{},time:timers[base]||0,note:fields[base+'_n']||''};
+          const item={scene:scene.name,round:ri+1,scores:{},time:timers[base]||0,note:fields[base+'_n']||'',imgs:fields[base+'_imgs']||[]};
           dims.forEach(d=>{item.scores[d.k]=scores[base+'_'+d.k]});
           const v=Object.values(item.scores).filter(x=>x!==undefined);
           item.avg=v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2):'';
@@ -360,7 +360,7 @@ async function doSubmit(){
       const list=cfg.target==='gdd'?GDD_CASES.filter(c=>cfg.cases.includes('g'+c.num)):DIRECT_CASES.filter(c=>cfg.cases.includes('d'+c.num));
       list.forEach(c=>{
         const base=pk+'_'+(cfg.target==='gdd'?'g':'d')+c.num;
-        const item={name:c.name,num:c.num,scores:{},time:timers[base]||0,note:fields[base+'_n']||''};
+        const item={name:c.name,num:c.num,scores:{},time:timers[base]||0,note:fields[base+'_n']||'',imgs:fields[base+'_imgs']||[]};
         dims.forEach(d=>{item.scores[d.k]=scores[base+'_'+d.k]});
         const v=Object.values(item.scores).filter(x=>x!==undefined);
         item.avg=v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2):'';
@@ -521,9 +521,38 @@ async function delSubmit(fileName,idx){
 }
 function expAll(){
   const all=window._d||[];const wb=XLSX.utils.book_new();const rows=[];
-  all.forEach(d=>{(d.data||[]).forEach(pd=>{(pd.items||[]).forEach(item=>{const row={人:d.name,平台:pd.platform,目标:d.target,场景:item.scene||'',名称:item.name||'',轮:item.round||''};Object.entries(item.scores||{}).forEach(([k,v])=>row[k]=v);row['均分']=item.avg;row['耗时']=item.time;row['备注']=item.note;rows.push(row)})})});
+  all.forEach(d=>{(d.data||[]).forEach(pd=>{(pd.items||[]).forEach(item=>{const row={人:d.name,平台:pd.platform,目标:d.target,场景:item.scene||'',名称:item.name||'',轮:item.round||''};Object.entries(item.scores||{}).forEach(([k,v])=>row[k]=v);row['均分']=item.avg;row['耗时']=item.time;row['备注']=item.note;row['截图数']=(item.imgs||[]).length;rows.push(row)})})});
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'data');
-  XLSX.writeFile(wb,'eval_'+new Date().toISOString().slice(0,10)+'.xlsx');toast('已导出')
+  XLSX.writeFile(wb,'eval_'+new Date().toISOString().slice(0,10)+'.xlsx');toast('已导出Excel');
+  // Also generate HTML report with embedded images
+  if(all.some(d=>(d.data||[]).some(pd=>(pd.items||[]).some(i=>(i.imgs||[]).length>0)))){
+    setTimeout(()=>{if(confirm('检测到截图数据，是否同时导出含图片的HTML报告？'))expHtmlReport(all)},300);
+  }
+}
+function expHtmlReport(all){
+  let html='<!DOCTYPE html><html><head><meta charset=UTF-8><title>测评报告(含截图)</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;padding:30px;font-size:13px;color:#1c1917}h1{font-size:20px;margin-bottom:8px}h2{font-size:16px;margin:16px 0 6px;color:#ea580c;border-bottom:2px solid #ea580c;padding-bottom:3px}h3{font-size:13px;margin:10px 0 4px;color:#44403c}table{border-collapse:collapse;width:100%;margin:6px 0 12px;font-size:11px}th,td{border:1px solid #e7e5e4;padding:4px 6px;text-align:center}th{background:#fafaf9;font-weight:600}.imgs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}.imgs img{width:120px;height:90px;object-fit:cover;border-radius:4px;border:1px solid #e7e5e4}.meta{color:#78716c;font-size:11px;margin-bottom:16px}</style></head><body>';
+  html+='<h1>AI游戏平台测评报告</h1><div class=meta>导出时间: '+new Date().toLocaleString('zh-CN')+' | 含截图</div>';
+  all.forEach(d=>{
+    html+='<h2>'+d.name+'</h2>';
+    (d.data||[]).forEach(pd=>{
+      html+='<h3>'+pd.platform+'</h3><table><tr><th>项目</th><th>均分</th><th>耗时</th><th>备注</th><th>截图</th></tr>';
+      (pd.items||[]).forEach(item=>{
+        html+='<tr><td>'+(item.scene||item.name||'')+(item.round?' 轮'+item.round:'')+'</td><td style=font-weight:700;color:#ea580c>'+(item.avg||'-')+'</td><td>'+(item.time||0)+'s</td><td style=text-align:left>'+(item.note||'')+'</td><td>';
+        if((item.imgs||[]).length){
+          html+='<div class=imgs>';
+          (item.imgs||[]).forEach(src=>{html+='<img src="'+src+'">'});
+          html+='</div>';
+        }else{html+='-'}
+        html+='</td></tr>';
+      });
+      html+='</table>';
+    });
+  });
+  html+='</body></html>';
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='eval_report_'+new Date().toISOString().slice(0,10)+'.html';a.click();
+  toast('HTML报告已导出(含图片)');
 }
 if(cfg.name&&cfg.platforms.length)mode='tester';
 render();
