@@ -186,13 +186,18 @@ function testerH(){
     const myScenes=SCENES.filter(s=>cfg.scenes.includes(s.id));
     h+='<div class="s" style="border-color:var(--abr);background:var(--abg)"><div class="sh"><div class="sn" style="background:var(--dark)">0</div><div class="st">基础Prompt（每个平台先发）</div></div><div class="prompt-box" onclick="cp(this,\''+MULTI_BASE+'\')">'+MULTI_BASE+'</div></div>';
     myScenes.forEach(scene=>{
-      h+='<div class="sd" style="font-size:11px;font-weight:700;margin-top:10px;padding-bottom:3px;border-bottom:2px solid var(--accent)">'+scene.name+'</div>';
-      scene.rounds.forEach((r,ri)=>{
-        h+='<div class="s"><div class="sh"><div class="sn">'+(ri+1)+'</div><div class="st">轮'+(ri+1)+'</div></div>';
-        h+='<div class="prompt-box" onclick="cp(this,`'+r.p.replace(/`/g,"'")+'`)">'+r.p+'</div>';
-        if(r.n)h+='<div class="sd" style="color:var(--red)">* '+r.n+'</div>';
-        h+=scoreGrid(scene.id+'_r'+(ri+1),dims,shorts);
-        h+='</div>';
+      h+='<div style="margin-top:16px;padding:10px 14px;font-size:18px;font-weight:700;background:var(--dark);color:#fff;border-radius:8px">'+scene.name+'</div>';
+      cfg.platforms.forEach(plat=>{
+        const pk=plat.replace(/[^a-zA-Z0-9]/g,'_');
+        h+='<div style="margin-top:12px;padding:6px 12px;font-size:14px;font-weight:700;color:var(--accent);border-left:3px solid var(--accent)">'+plat+'</div>';
+        scene.rounds.forEach((r,ri)=>{
+          const base=pk+'_'+scene.id+'_r'+(ri+1);
+          h+='<div class="s"><div class="sh"><div class="sn">'+(ri+1)+'</div><div class="st">轮'+(ri+1)+'</div></div>';
+          h+='<div class="prompt-box" onclick="cp(this,`'+r.p.replace(/`/g,"'")+'`)">'+r.p+'</div>';
+          if(r.n)h+='<div class="sd" style="color:var(--red)">* '+r.n+'</div>';
+          h+=scoreSingle(base,dims,shorts);
+          h+='</div>';
+        });
       });
     });
   } else {
@@ -205,6 +210,47 @@ function testerH(){
     });
   }
   h+='<div class="submit-bar"><span style="font-size:9px;color:var(--dim)">全部打完后提交</span><button class="submit-btn" id="subBtn" onclick="doSubmit()">提交</button></div>';
+  return h;
+}
+function scoreSingle(base,dims,shorts){
+  let h='<div class="sp" style="margin-top:4px">';
+  dims.forEach((dim,di)=>{
+    const sk=base+'_'+dim.k;
+    h+='<div class="sr"><span class="sl">'+dim.name+'</span><div class="sb">';
+    for(let v=0;v<4;v++){
+      const tip=shorts[di*4+v];
+      h+='<button class="sc'+(scores[sk]===v?' a'+v:'')
+        +'" data-k="'+sk+'" data-v="'+v+'" onclick="setS(\''+sk+'\','+v+')">'+v
+        +'<span class="tp">'+v+': '+tip+'</span></button>';
+    }
+    h+='</div></div>';
+  });
+  // Subjective
+  const subjK=base+'_subj';
+  h+='<div class="sr"><span class="sl">主观综合</span><div class="sb">';
+  for(let v=0;v<4;v++){
+    h+='<button class="sc'+(scores[subjK]===v?' a'+v:'')
+      +'" data-k="'+subjK+'" data-v="'+v+'" onclick="setS(\''+subjK+'\','+v+')">'+v
+      +'<span class="tp">'+['想关掉','无感','想收藏','想分享'][v]+'</span></button>';
+  }
+  h+='</div></div>';
+  // Timer + manual
+  h+='<div class="extras"><span class="tm" id="tm_'+base+'">'+fmt(timers[base]||0)+'</span>';
+  h+='<button class="tb" onclick="tStart(\''+base+'\')">&#9654;</button>';
+  h+='<button class="tb" onclick="tStop(\''+base+'\')">||</button>';
+  h+='<button class="tb" onclick="tReset(\''+base+'\')">R</button>';
+  h+='<input type="number" placeholder="分钟" style="width:50px" value="'+(fields[base+'_min']||'')+'" onchange="fields[\''+base+'_min\']=this.value">';
+  h+='</div>';
+  // Note
+  h+='<div class="extras"><input placeholder="备注" style="flex:1" value="'+(fields[base+'_n']||'').replace(/"/g,'&quot;')+'" onchange="fields[\''+base+'_n\']=this.value"></div>';
+  // Images
+  h+='<div class="img-zone" data-imgbase="'+base+'" tabindex="0" ondrop="dropImg(event,\''+base+'\')" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')">';
+  h+='<div class="img-zone-label">截图（点击+/拖入/Ctrl+V）</div><div class="img-list">';
+  const imgs=fields[base+'_imgs']||[];
+  imgs.forEach((src,ii)=>{h+='<div class="img-thumb"><img src="'+src+'"><div class="img-del" onclick="event.stopPropagation();rmImg(\''+base+'\','+ii+')">x</div></div>'});
+  if(imgs.length<4){h+='<label class="img-add"><input type="file" accept="image/*" style="display:none" onchange="addImg(\''+base+'\',this)">+</label>';}
+  h+='</div></div>';
+  h+='</div>';
   return h;
 }
 function scoreGrid(itemKey,dims,shorts){
