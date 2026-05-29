@@ -349,7 +349,8 @@ async function loadSum(){
       sl+='</div></div></div>';
     });
     document.getElementById('submitList').innerHTML=sl;
-  },0)loadSum(){
+  },0);
+async function loadSum(){
   const files=await ghList('data');const all=[];
   const fnames=[];for(const f of files){if(!f.name.endsWith('.json'))continue;const d=await ghGet('data/'+f.name);if(d){all.push(d);fnames.push(f.name)}}window._files=fnames
   if(!all.length){document.getElementById('app').innerHTML='<div class="s sd">暂无数据</div>';return}
