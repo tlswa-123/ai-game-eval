@@ -125,11 +125,12 @@ const DIMS_3=[
 {k:'intent',name:'意图理解',d:['完全答非所问','大方向对但细节有偏差','准确理解用户要改什么','精确理解且主动考虑到关联影响']},
 {k:'precision',name:'修改精准度',d:['没修改或改错地方','改了但牵连其他部分/引入新Bug','只改了该改的，无新Bug','精准修改且优化了相关代码质量']},
 {k:'completeness',name:'修改完成度',d:['没有执行修改','只做了一小部分','80%以上要求完成','全部完成，无遗漏']},
-{k:'quality',name:'修改后质量',d:['改崩了，比修改前更差','勉强改了但质量下降','持平或略有提升','明显变好，整体质量提升']}
+{k:'quality',name:'修改后质量',d:['改崩了，比修改前更差','勉强改了但质量下降','持平或略有提升','明显变好，整体质量提升']},
+{k:'subjective',name:'主观综合评价',focus:'想不想主动玩或主动分享？',d:['第一眼劝退，或玩了一半想关掉（第一印象）','看起来有意思，玩几把无感了，不会主动再打开（进一步体验）','有点上头，可以收藏下次玩，是完整的游戏（主动玩）','好玩有意思！想分享出去，完成度高，成熟游戏（主动传播）']}
 ];
 // Short tips for hover
 const SHORT_12=['致命bug/无法启动','能跑但核心异常','正常仅小瑕疵','零Bug稳定','元素缺失/意义不明','可辨识但不协调','统一清晰协调','有点睛/沉浸感','无声/刺耳/爆音','有但瑕疵','完整契合正常','调动情绪/层次','跑题/换机制','有遗漏/偏差','全部实现','完整+合理扩展','机制不成立','能玩但失衡','合理均衡','有惊喜出彩','第一眼劝退','玩几把无感','想收藏下次玩','想分享出去'];
-const SHORT_3=['答非所问','方向对有偏差','准确理解','精确+关联','改错/没改','牵连新Bug','精准无Bug','精准+优化','没执行','一小部分','80%完成','全部完成','改崩了','质量下降','持平/提升','明显变好'];
+const SHORT_3=['答非所问','方向对有偏差','准确理解','精确+关联','改错/没改','牵连新Bug','精准无Bug','精准+优化','没执行','一小部分','80%完成','全部完成','改崩了','质量下降','持平/提升','明显变好','第一眼劝退','玩几把无感','想收藏下次玩','想分享出去'];
 // ===== CASES =====
 const SCENES=[{id:'s1',name:'场景1：冲突处理',rounds:[{p:'消除后不要再生成新水果了，让格子慢慢清空就过关。做成无尽模式让玩家能一直玩停不下来',n:'不补水果vs无尽矛盾'},{p:'把格子改成6x6但每行只能放5个水果',n:'6列vs每行5个矛盾'},{p:'把水果种类从6种加到12种，同时要求3个相同的连成一排才能消除',n:'12种极难凑3连'}]},{id:'s2',name:'场景2：改玩法',rounds:[{p:'把无尽模式改成60秒限时模式，时间到显示最终得分',n:''},{p:'加一个combo连击系统，连续消除3次以上额外加50分，显示combo x3文字',n:''},{p:'加一个特殊道具，满足特定条件时生成，点击可消除周围一圈',n:''}]},{id:'s3',name:'场景3：改美术',rounds:[{p:'把所有元素图标换成宝石主题',n:''},{p:'背景换成太空星空主题，深色的',n:''},{p:'整体画风从卡通改成像素复古风格',n:''}]},{id:'s4',name:'场景4：多条指令',rounds:[{p:'帮我改三个地方：1.背景改成黑色 2.加个60秒倒计时 3.分数字体放大两倍',n:''},{p:'再改三个：1.加操作音效 2.动画改成爆炸粒子效果 3.加一个历史最高分显示',n:''},{p:'最后改两个：1.加一个暂停按钮在右上角 2.加一个重新开始按钮在暂停旁边',n:''}]},{id:'s5',name:'场景5：模糊反馈',rounds:[{p:'感觉不太好玩',n:''},{p:'太简单了，没什么挑战',n:''},{p:'颜色太多了眼花',n:''}]}];
 const GDD_CASES=[{num:1,name:'对对连消'},{num:2,name:'奇妙不停消'},{num:3,name:'挪一挪大师'},{num:4,name:'旅行餐车'},{num:5,name:'最美消消消'},{num:6,name:'星星喜消消'},{num:7,name:'收贝经典方块'},{num:8,name:'密室消除7'},{num:9,name:'萌小贝迷你小镇'},{num:10,name:'吃碰杠胡了'}];
@@ -171,7 +172,7 @@ function renderSide(){
     if(dim.focus)h+='<div class="focus">'+dim.focus+'</div>';
     h+=dim.d.map((desc,i)=>'<div class="row"><b class="c'+i+'">'+i+'</b> '+desc+'</div>').join('');
   });
-  h+='<h4 style="margin-top:12px;color:var(--accent)">主观综合（共通）</h4><div class="row"><b class="c0">0</b> 第一眼劝退（第一印象）</div><div class="row"><b class="c1">1</b> 玩几把无感，不会再开（进一步体验）</div><div class="row"><b class="c2">2</b> 想收藏下次玩（主动玩）</div><div class="row"><b class="c3">3</b> 想分享出去（主动传播）</div>';
+  // Subjective is now shown as part of dims
   document.getElementById('side').innerHTML=h;
 }
 
@@ -225,15 +226,7 @@ function scoreSingle(base,dims,shorts){
     }
     h+='</div></div>';
   });
-  // Subjective
-  const subjK=base+'_subj';
-  h+='<div class="sr"><span class="sl">主观综合</span><div class="sb">';
-  for(let v=0;v<4;v++){
-    h+='<button class="sc'+(scores[subjK]===v?' a'+v:'')
-      +'" data-k="'+subjK+'" data-v="'+v+'" onclick="setS(\''+subjK+'\','+v+')">'+v
-      +'<span class="tp">'+['想关掉','无感','想收藏','想分享'][v]+'</span></button>';
-  }
-  h+='</div></div>';
+  // Subjective is now part of dims array
   // Timer + manual
   h+='<div class="extras"><span class="tm" id="tm_'+base+'">'+fmt(timers[base]||0)+'</span>';
   h+='<button class="tb" onclick="tStart(\''+base+'\')">&#9654;</button>';
@@ -268,13 +261,6 @@ function scoreGrid(itemKey,dims,shorts){
       }
       h+='</div></div>';
     });
-    // Subjective score row
-    const subjK=base+'_subj';
-    h+='<div class="sr"><span class="sl">主观综合</span><div class="sb">';
-    for(let v=0;v<4;v++){
-      h+='<button class="sc'+(scores[subjK]===v?' a'+v:'')+'" data-k="'+subjK+'" data-v="'+v+'" onclick="setS(\''+subjK+'\','+v+')">'+v+'<span class="tp">'+['想关掉','无感','想收藏','想分享'][v]+'</span></button>';
-    }
-    h+='</div></div>';
     // Timer + manual time input
     h+='<div class="extras"><span class="tm" id="tm_'+base+'">'+fmt(timers[base]||0)+'</span><button class="tb" onclick="tStart(\''+base+'\')">&#9654;</button><button class="tb" onclick="tStop(\''+base+'\')">||</button><button class="tb" onclick="tReset(\''+base+'\')">R</button><input type="number" placeholder="分钟" style="width:50px" value="'+(fields[base+'_min']||'')+'" onchange="fields[\''+base+'_min\']=this.value"><span style="font-size:11px;color:var(--light)">min</span></div>';
     // Note
