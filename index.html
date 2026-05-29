@@ -99,6 +99,11 @@ table.dt th{background:var(--bg);font-size:11px;font-weight:600;color:var(--dim)
 .lightbox img{max-width:90%;max-height:90%;border-radius:8px;box-shadow:0 4px 30px rgba(0,0,0,.5)}
 
 .extras textarea{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:12px;font-family:inherit;line-height:1.5;overflow:hidden;box-sizing:border-box;width:100%}
+
+.plat-tabs{display:flex;gap:0;margin-top:10px;border-bottom:2px solid var(--border);overflow-x:auto}
+.plat-tab{padding:8px 16px;font-size:13px;font-weight:600;border:none;background:none;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.plat-tab:hover{color:var(--accent)}
+.plat-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -200,9 +205,16 @@ function testerH(){
     h+='<div class="s" style="border-color:var(--abr);background:var(--abg)"><div class="sh"><div class="sn" style="background:var(--dark)">0</div><div class="st">基础Prompt（每个平台先发）</div></div><div class="prompt-box" onclick="cp(this,\''+MULTI_BASE+'\')">'+MULTI_BASE+'</div></div>';
     myScenes.forEach(scene=>{
       h+='<div style="margin-top:16px;padding:10px 14px;font-size:18px;font-weight:700;background:var(--dark);color:#fff;border-radius:8px">'+scene.name+'</div>';
-      cfg.platforms.forEach(plat=>{
+      // Platform tabs
+      h+='<div class="plat-tabs" data-scene="'+scene.id+'">';
+      cfg.platforms.forEach((plat,pi)=>{
+        h+='<button class="plat-tab'+(pi===0?' active':'')+'" onclick="switchPlatTab(this,\''+scene.id+'\','+pi+')">'+plat+'</button>';
+      });
+      h+='</div>';
+      // Platform panels
+      cfg.platforms.forEach((plat,pi)=>{
         const pk=plat.replace(/[^a-zA-Z0-9]/g,'_');
-        h+='<div style="margin-top:12px;padding:6px 12px;font-size:14px;font-weight:700;color:var(--accent);border-left:3px solid var(--accent)">'+plat+'</div>';
+        h+='<div class="plat-panel" data-scene="'+scene.id+'" data-pi="'+pi+'" style="'+(pi===0?'':'display:none')+'">';
         scene.rounds.forEach((r,ri)=>{
           const base=pk+'_'+scene.id+'_r'+(ri+1);
           h+='<div class="s"><div class="sh"><div class="sn">'+(ri+1)+'</div><div class="st">轮'+(ri+1)+'</div></div>';
@@ -211,6 +223,7 @@ function testerH(){
           h+=scoreSingle(base,dims,shorts);
           h+='</div>';
         });
+        h+='</div>';
       });
     });
   } else {
@@ -524,6 +537,11 @@ document.addEventListener("drop",function(e){var el=e.target.closest("[data-imgb
 document.addEventListener("dragover",function(e){if(e.target.closest("[data-imgbase]"))e.preventDefault()});
 document.addEventListener('click',function(e){if(e.target.tagName==='IMG'&&e.target.closest('.img-thumb')){viewImg(e.target.src)}});
 function viewImg(src){document.getElementById("lbImg").src=src;document.getElementById("lightbox").classList.add("show")}
+function switchPlatTab(btn,sceneId,pi){
+  btn.parentElement.querySelectorAll('.plat-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.plat-panel[data-scene="'+sceneId+'"]').forEach(p=>{p.style.display=p.dataset.pi==pi?'':'none'});
+}
 render();
 </script>
 
